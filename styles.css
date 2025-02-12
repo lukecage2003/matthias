@@ -59,6 +59,9 @@ header {
 .upload-button:hover {
     background-color: #005bb5;
 }
+.contact-section {
+text-align: center;
+}
 .portfolio-grid {
     display: flex;
     gap: 10px;
