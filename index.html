@@ -126,10 +126,62 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            cursor: pointer;
         }
         .portfolio-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05);
+        }
+        .modal {
+            display: none;
+            position: relative;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            animation: slideDown 0.3s ease-in-out;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            transition: 0.3s;
+        }
+        .close:hover {
+            color: red;
+        }
+        .download-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .download-btn:hover {
+            background: #218838;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
     </style>
 </head>
@@ -166,12 +218,18 @@
         <section id="portfolio" class="portfolio-section">
             <h2>Nos Portofolios</h2>
             <div class="portfolio-grid">
-                <div class="portfolio-item">Matthias</div>
-                <div class="portfolio-item">Salma</div>
+                <div class="portfolio-item" onclick="openModal('cv-matthias.png')">Matthias</div>
+                <div class="portfolio-item" onclick="openModal('cv-matthias.png')">Salma</div>
                 <div class="portfolio-item">Tiziana</div>
                 <div class="portfolio-item">Zahra</div>
             </div>
         </section>
+        <div id="cvModal" class="modal">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>CV de l'utilisateur</h3>
+            <iframe id="cvFrame" width="100%" height="300px"></iframe>
+            <a id="downloadLink" class="download-btn" download>Télécharger le CV</a>
+        </div>
         <section id="contact" class="contact-section">
             <h2>Contactez-nous</h2>
             <p>Rejoignez-nous sur nos plateformes :</p>
@@ -208,7 +266,16 @@ document.addEventListener('DOMContentLoaded', function() {
         navMenu.classList.toggle('show');
     });
 });
-
+function openModal(cvFile) {
+            document.getElementById('cvFrame').src = cvFile;
+            document.getElementById('downloadLink').href = cvFile;
+            document.getElementById('cvModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('cvModal').style.display = 'none';
+            document.getElementById('cvFrame').src = '';
+        }        
     </script>
 </body>
 </html>
