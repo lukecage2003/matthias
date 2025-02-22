@@ -15,7 +15,7 @@
             scroll-behavior: smooth;
             animation: fadeIn 1s ease-in;
         }
-        @keyframes fadeIn { 
+        @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
@@ -183,36 +183,9 @@
             from { transform: translateY(-20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-        iframe {
-            width: 100%;
-            height: 500px;
-            border: 1px solid #ccc;
-            display: none;
-            margin-top: 20px;
-        }
-        #downloadBtn {
-            display: none;
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        #downloadBtn:hover {
-            background-color: #218838;
-        }
     </style>
 </head>
-<body>  
-    <!-- Zone d'aperçu du CV -->
-    <iframe id="pdfViewer"></iframe>
-    
-    <!-- Bouton de téléchargement -->
-    <br>
-    <a id="downloadBtn
-        
+<body>
     <header class="fixed-header">
         <div class="burger-menu" onclick="toggleMenu()">
                 <div></div>
@@ -245,13 +218,13 @@
         <section id="portfolio" class="portfolio-section">
             <h2>Nos Portofolios</h2>
             <div class="portfolio-grid">
-                <div class="portfolio-item" onclick="openModal('cv-matthias.png')">Matthias</div>
+                <div class="portfolio-item" onclick="openmodal('cv-matthias.png')">Matthias</div>
                 <div class="portfolio-item" onclick="openModal('cv-matthias.png')">Salma</div>
                 <div class="portfolio-item">Tiziana</div>
                 <div class="portfolio-item">Zahra</div>
             </div>
         </section>
-        <div id="cvModal" class="modal">
+        <div id="cvmodal" class="modal">
             <span class="close" onclick="closeModal()">&times;</span>
             <h3>CV de l'utilisateur</h3>
             <iframe id="cvFrame" width="100%" height="300px"></iframe>
@@ -303,7 +276,6 @@ function openModal(cvFile) {
             document.getElementById('cvModal').style.display = 'none';
             document.getElementById('cvFrame').src = '';
         }        
-         
     </script>
 </body>
 </html>
