@@ -308,21 +308,7 @@ function openModal(cvFile) {
             document.getElementById('cvModal').style.display = 'none';
             document.getElementById('cvFrame').src = '';
         }        
-          // URL du CV (remplace par le chemin réel de ton fichier PDF)
-        const cvURL = "cv-exemple.pdf"; 
-
-        document.getElementById('viewCvBtn').addEventListener('click', function() {
-            const pdfViewer = document.getElementById('pdfViewer');
-            const downloadBtn = document.getElementById('downloadBtn');
-
-            // Afficher le CV dans l'iframe
-            pdfViewer.src = cvURL;
-            pdfViewer.style.display = "block";
-
-            // Afficher le bouton de téléchargement
-            downloadBtn.href = cvURL;
-            downloadBtn.style.display = "inline-block";
-            downloadBtn.textContent = "📥 Télécharger le CV";
+         
     </script>
 </body>
 </html>
