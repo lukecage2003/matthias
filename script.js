@@ -71,3 +71,4 @@ ducument.addEventListener("DOMContentLoaded", function () {
         navlinks.classList.toggle("active");
     });
 });
+
