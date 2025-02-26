@@ -182,6 +182,71 @@
             from { transform: translateY(-20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+        /*réalisations et a propos de moi*/
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        footer {
+            background-color: #222;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+        .about-container {
+            max-width: 8000px;
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: left;
+            flex-direction: row-reverse;
+        }
+        .about-text {
+            flex: 1;
+        }
+        .about-image img {
+            max-width: 500px;
+            border-radius: 50%;
+            margin-left: 20px;
+        }
+        h2 {
+            color: #020202;
+        }
+        .realizations {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .realization-box {
+            background-color: #eeeeee;
+            color: rgb(3, 3, 3);
+            padding: 15px;
+            margin: 10px auto;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+            width: 50%;
+        }
+        .realization-box:hover {
+            background-color: #444;
+        }
+        .realization-details {
+            display: none;
+            background-color: #444;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -211,8 +276,48 @@
                       Tech Shield offre une expérience fluide, moderne et professionnelle à tous les utilisateurs.</p>
             </div>
         </section>
+        <div class="about-container">
+            <div class="about-text">
+                <h2>À propos de nous</h2>
+                <p>Passionné(e) par <strong>[ton domaine d’expertise]</strong>, je mets mon savoir-faire et ma créativité au service de projets innovants et ambitieux. Fort(e) d’une expérience en <strong>[compétence principale ou métier]</strong>, j’ai eu l’opportunité de travailler sur <strong>[exemples de projets ou réalisations marquantes]</strong>, ce qui m’a permis d’affiner mon approche et d’acquérir une expertise solide.</p>
+                <p>Curieux(se) et en constante évolution, j’aime relever de nouveaux défis et explorer de nouvelles idées. Mon objectif ? Apporter des solutions efficaces, adaptées et créatives à chaque projet qui m’est confié.</p>
+                <p>Sur ce site, vous trouverez un aperçu de mon parcours, de mes compétences et de mes réalisations. N’hésitez pas à me contacter pour échanger et collaborer ensemble sur de nouveaux projets !</p>
+            </div>
+            <div class="about-image">
+                <img src="1.png" alt="Photo de profil">
+            </div>
+        </div>
+       
         <section id="upload" class="upload-section">
-      
+            <div class="realizations">
+                <h2>Mes Réalisations</h2>
+                <div class="realization-box" onclick="toggleDetails('dev')">Développement Web</div>
+                <div id="dev" class="realization-details">
+                    <ul>
+                        <li>Création d'une plateforme e-commerce</li>
+                        <li>Développement d'un portfolio interactif</li>
+                        <li>Refonte d'un site institutionnel</li>
+                    </ul>
+                </div>
+                
+                <div class="realization-box" onclick="toggleDetails('design')">Design Graphique</div>
+                <div id="design" class="realization-details">
+                    <ul>
+                        <li>Conception d’une identité visuelle</li>
+                        <li>Création d’une affiche publicitaire</li>
+                        <li>Développement d’un packaging produit</li>
+                    </ul>
+                </div>
+                
+                <div class="realization-box" onclick="toggleDetails('photo')">Photographie</div>
+                <div id="photo" class="realization-details">
+                    <ul>
+                        <li>Réalisation d’un shooting produit</li>
+                        <li>Couverture d’un événement haut de gamme</li>
+                        <li>Création d’un book photo personnel</li>
+                    </ul>
+                </div>
+            </div>
         <section id="portfolio" class="portfolio-section">
             <h2>Nos Portfolios</h2>
            
@@ -297,6 +402,14 @@ function openModal(cvFile) {
             document.getElementById('cvModal').style.display = 'none';
             document.getElementById('cvFrame').src = '';
         }        
+        function toggleDetails(id) {
+            var details = document.getElementById(id);
+            if (details.style.display === "none") {
+                details.style.display = "block";
+            } else {
+                details.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>
