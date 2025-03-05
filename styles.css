@@ -5,7 +5,6 @@ body {
     padding: 0;
     overflow-x: hidden;
     scroll-behavior: smooth;
-    font-size: 18px;
 }
 
 /* En-tête */
@@ -135,11 +134,11 @@ header {
 }
 
 .cv-content, .modal-content {
-    background: white;
+    background: none²k;
     padding: 20px;
     border-radius: 10px;
     width: 90%;
-    max-width: 400px;
+    max-width: 300px;
     text-align: center;
     position: relative;
     animation: zoomIn 0.3s ease-in-out;
@@ -160,7 +159,7 @@ header {
     position: absolute;
     top: 10px;
     right: 1px;
-    left: 150%;
+    left: 130%;
     font-size: 24px;
     text-decoration: none;
     color: #333;
@@ -202,7 +201,7 @@ input, textarea {
 footer {
     text-align: center;
     padding: 2px;
-    background-color: #000;
+    background-color: #000000bf;
     color: white;
     position: relative;
     bottom: 0;
@@ -216,4 +215,13 @@ footer {
 
 @media screen and (max-width: 600px) {
     body { font-size: 14px; }
+}
+@media (max-width: 600px) {
+    nav {
+        flex-direction: column;
+        align-items: center;
+    }
+    .box {
+        flex-basis: 100%;
+    }
 }
