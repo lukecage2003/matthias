@@ -291,6 +291,7 @@
                 <p>Curieux et en constante évolution, j’aime relever de nouveaux défis et explorer de nouvelles idées. Mon objectif ? Apporter des solutions efficaces, adaptées et créatives à chaque projet qui m’est confié.</p>
                 <p>Sur ce site, vous trouverez un aperçu de mon parcours, de mes compétences et de mes réalisations. N’hésitez pas à me contacter pour échanger et collaborer ensemble sur de nouveaux projets !</p>
             </div>
+    
             <div class="about-image">
                 <img src="1.png" alt="Photo de profil">
             </div>
@@ -325,9 +326,68 @@
                         <li>Création d’un book photo personnel</li>
                     </ul>
                 </div>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        margin-top: 50px;
+                    }
+            
+                    button {
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        border-radius: 100px;
+                    }
+            
+                    /* Style du conteneur PDF */
+                    .pdf-container {
+                        display: none;
+                        position: fixed;
+                        top: 10%;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 90%;
+                        height: 80%;
+                        background: white;
+                        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+                        border-radius: 10px;
+                        overflow: hidden;
+                        z-index: 1000;
+                    }
+                    .close {
+                        position: absolute;
+                        top: 10px;
+                        right: 1px;
+                        font-size: 24px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        color: #333;
+                        transition: 0.3s;
+                    }            
+                        .pdf-container iframe {
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                    }
+                    .close:hover {
+                        color: red;}
+                </style>
+
+            </head>
+            <body>
+                <h3>Nos Portfolios</h3>
+                <button onclick="togglePdf('portfolio matthias.pdf')">Matthias</button>
+                <button onclick="togglePdf('document2.pdf')">Salma</button>
+                <button onclick="togglePdf('document3.pdf')">Zahra</button>
+            
+                <div class="pdf-container" id="pdfContainer">
+                    <span class="close" onclick="togglePdf()">&times;</span>
+                    <iframe id="pdfViewer"></iframe>
+                </div>
             </div>
         <section id="portfolio" class="portfolio-section">
-            <h2>Nos Portfolios</h2>
+            <h2>Nos CV</h2>
            
               
               <div class="portfolio-grid">
@@ -343,6 +403,14 @@
                 <img src="cv-matthias.png" alt="CV de Matthias">
 
                 <a href="cv-matthias.png" download class="download-btn">Télécharger le CV</a>
+            </div>
+        </div>
+        <div id="cv-salma" class="cv-modal">
+            <div class="cv-content">
+                <a href="#!" class="close-btn">&times;</a>
+                <img src="cv-salma.png" alt="CV de Salma">
+
+                <a href="cv-salma.png" download class="download-btn">Télécharger le CV</a>
             </div>
         </div>
         <section id="contact" class="contact-section">
@@ -374,7 +442,7 @@
                     <img src="facebook-removebg-preview (1).png" alt="Facebook" width="60"></a>
                 <a href="https://www.twitter.com" target="_blank">
                     <img src="png-transparent-twitter-x-logo-removebg-preview.png" alt="Twitter" width="45"></a>
-                <a href="https://www.linkedin.com" target="_blank">
+                <a href="https://www.linkedin.com/in/matthias-amona-a268b623b/" target="_blank">
                     <img src="linkedin-removebg-preview.png" alt="LinkedIn" width="60"></a>
             </div>
         </section>
@@ -418,6 +486,19 @@ function openModal(cvFile) {
                 details.style.display = "none";
             }
         }
+        function togglePdf(pdfUrl) {
+            var pdfContainer = document.getElementById('pdfContainer');
+            var pdfViewer = document.getElementById('pdfViewer');
+
+            if (pdfContainer.style.display === 'none' || pdfContainer.style.display === '') {
+                pdfViewer.src = pdfUrl;
+                pdfContainer.style.display = 'block';
+            } else {
+                pdfViewer.src = '';
+                pdfContainer.style.display = 'none';
+            }
+        }
+
     </script>
 </body>
 </html>
