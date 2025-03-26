@@ -8,7 +8,23 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="admin-styles.css">
     <script defer src="script.js"></script>
+    <script defer src="auth.js"></script>
+    <script defer src="twofa.js"></script>
+    <script defer src="security-logs.js"></script>
+    <script defer src="ip-config.js"></script>
+    <script defer src="ip-whitelist.js"></script>
+    <script defer src="user-permissions.js"></script>
+    <script defer src="advanced-security-logs.js"></script>
+    <script defer src="login-security.js"></script>
+    <script defer src="events.js"></script>
+    <script defer src="admin-events.js"></script>
+    <script defer src="security-dashboard.js"></script>
     <script defer src="admin.js"></script>
+    
+    <!-- FullCalendar.js -->    
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/fr.js"></script>
 </head>
 <body>
     <header class="fixed-header">
@@ -43,6 +59,7 @@
                 <li><a href="#" class="active" data-tab="security">Sécurité</a></li>
                 <li><a href="#" data-tab="users">Utilisateurs</a></li>
                 <li><a href="#" data-tab="logs">Journaux</a></li>
+                <li><a href="#" data-tab="events">Événements</a></li>
                 <li><a href="#" data-tab="settings">Paramètres</a></li>
             </ul>
         </nav>
@@ -59,9 +76,12 @@
                             <p>Protégez votre compte avec une couche de sécurité supplémentaire.</p>
                             <div class="twofa-status">
                                 <span>Statut: </span>
-                                <span id="twofaStatus" class="status-enabled">Activé</span>
+                                <span id="twofaStatus" class="status-disabled">Désactivé</span>
                             </div>
-                            <button id="configureTwoFA" class="admin-btn">Configurer 2FA</button>
+                            <div class="twofa-buttons">
+                                <button id="configureTwoFA" class="admin-btn">Configurer 2FA</button>
+                                <button id="disableTwoFA" class="admin-btn cancel-btn">Désactiver 2FA</button>
+                            </div>
                             
                             <div id="twofaSetup" class="twofa-setup" style="display: none;">
                                 <div class="qr-code">
@@ -168,14 +188,81 @@
             <div id="users" class="admin-tab">
                 <div class="admin-card">
                     <h2>Gestion des utilisateurs</h2>
-                    <p>Fonctionnalité à venir...</p>
+                    <div class="user-management">
+                        <div class="user-list-container">
+                            <h3>Utilisateurs enregistrés</h3>
+                            <div id="userList" class="user-list">
+                                <!-- Les utilisateurs seront ajoutés ici dynamiquement -->
+                            </div>
+                        </div>
+                        
+                        <div class="user-form-container">
+                            <h3>Ajouter un utilisateur</h3>
+                            <form id="addUserForm">
+                                <div class="form-group">
+                                    <label for="newUserEmail">Email :</label>
+                                    <input type="email" id="newUserEmail" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newUserPassword">Mot de passe :</label>
+                                    <input type="password" id="newUserPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newUserRole">Rôle :</label>
+                                    <select id="newUserRole">
+                                        <option value="user">Utilisateur</option>
+                                        <option value="admin">Administrateur</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="admin-btn">Ajouter</button>
+                            </form>
+                            
+                            <div id="editUserForm" style="display: none; margin-top: 30px;">
+                                <h3>Modifier l'utilisateur</h3>
+                                <form id="updateUserForm">
+                                    <input type="hidden" id="editUserEmail">
+                                    <div class="form-group">
+                                        <label for="editUserPassword">Nouveau mot de passe :</label>
+                                        <input type="password" id="editUserPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editUserRole">Rôle :</label>
+                                        <select id="editUserRole">
+                                            <option value="user">Utilisateur</option>
+                                            <option value="admin">Administrateur</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="admin-btn">Mettre à jour</button>
+                                        <button type="button" id="cancelEditBtn" class="admin-btn cancel-btn">Annuler</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- Logs Tab -->
             <div id="logs" class="admin-tab">
                 <div class="admin-card">
-                    <h2>Journaux de connexion</h2>
+                    <h2>Connexions en temps réel</h2>
+                    <div class="realtime-logs-container">
+                        <div class="realtime-logs-header">
+                            <h3>Activité récente</h3>
+                            <div class="realtime-status">
+                                <span class="status-indicator active"></span>
+                                <span>Surveillance en direct</span>
+                            </div>
+                        </div>
+                        <div id="realtimeLogs" class="realtime-logs">
+                            <div class="no-logs-message">En attente d'activité de connexion...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-card">
+                    <h2>Historique des journaux de connexion</h2>
                     <table class="log-table">
                         <thead>
                             <tr>
@@ -187,29 +274,82 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>01/01/2023 12:00</td>
-                                <td>admin@techshield.com</td>
-                                <td>192.168.1.1</td>
-                                <td><span class="log-status log-success">Succès</span></td>
-                                <td>Connexion réussie</td>
-                            </tr>
-                            <tr>
-                                <td>01/01/2023 11:55</td>
-                                <td>admin@techshield.com</td>
-                                <td>10.0.0.2</td>
-                                <td><span class="log-status log-failed">Échec</span></td>
-                                <td>Mot de passe incorrect</td>
-                            </tr>
-                            <tr>
-                                <td>01/01/2023 11:50</td>
-                                <td>unknown@example.com</td>
-                                <td>203.0.113.1</td>
-                                <td><span class="log-status log-suspicious">Suspect</span></td>
-                                <td>Tentative depuis une IP non autorisée</td>
-                            </tr>
+                            <!-- Les journaux seront chargés dynamiquement ici -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+            
+            <!-- Events Tab -->
+            <div id="events" class="admin-tab">
+                <div class="admin-card">
+                    <h2>Gestion des événements</h2>
+                    <div class="events-management">
+                        <div class="events-calendar-container">
+                            <div id="eventsCalendar" class="events-calendar"></div>
+                        </div>
+                        
+                        <div class="events-form-container">
+                            <div id="addEventForm" class="event-form">
+                                <h3>Ajouter un événement</h3>
+                                <form id="eventForm">
+                                    <div class="form-group">
+                                        <label for="eventTitle">Titre :</label>
+                                        <input type="text" id="eventTitle" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="eventStart">Date de début :</label>
+                                        <input type="datetime-local" id="eventStart" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="eventEnd">Date de fin :</label>
+                                        <input type="datetime-local" id="eventEnd">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="eventDescription">Description :</label>
+                                        <textarea id="eventDescription" rows="4"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="eventColor">Couleur :</label>
+                                        <input type="color" id="eventColor" value="#3788d8">
+                                    </div>
+                                    <button type="submit" class="admin-btn">Ajouter</button>
+                                </form>
+                            </div>
+                            
+                            <div id="editEventForm" class="event-form" style="display: none;">
+                                <h3>Modifier l'événement</h3>
+                                <form id="updateEventForm">
+                                    <input type="hidden" id="editEventId">
+                                    <div class="form-group">
+                                        <label for="editEventTitle">Titre :</label>
+                                        <input type="text" id="editEventTitle" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editEventStart">Date de début :</label>
+                                        <input type="datetime-local" id="editEventStart" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editEventEnd">Date de fin :</label>
+                                        <input type="datetime-local" id="editEventEnd">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editEventDescription">Description :</label>
+                                        <textarea id="editEventDescription" rows="4"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editEventColor">Couleur :</label>
+                                        <input type="color" id="editEventColor">
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="admin-btn">Mettre à jour</button>
+                                        <button type="button" id="deleteEventBtn" class="admin-btn cancel-btn">Supprimer</button>
+                                        <button type="button" id="cancelEditEventBtn" class="admin-btn cancel-btn">Annuler</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             

@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="login-styles.css">
     <script defer src="script.js"></script>
     <script defer src="password-validation.js"></script>
+    <script defer src="auth.js"></script>
+    <script defer src="twofa.js"></script>
+    <script defer src="security-logs.js"></script>
+    <script defer src="ip-config.js"></script>
+    <script defer src="ip-whitelist.js"></script>
+    <script defer src="user-permissions.js"></script>
+    <script defer src="advanced-security-logs.js"></script>
+    <script defer src="login-security.js"></script>
+    <script defer src="csrf.js"></script>
 </head>
 <body>
     <header class="fixed-header">
@@ -50,10 +59,11 @@
                 <div class="form-group">
                     <button type="submit" class="auth-btn">Se connecter</button>
                 </div>
-                <p class="form-link">Pas encore de compte ? <a href="#" onclick="showTab('register')">S'inscrire</a></p>
-                <div class="form-group">
-                    <a href="admin.html" class="auth-btn">Administration</a>
+                <div class="form-group" id="adminButtonContainer" style="display: none;">
+                    <a href="admin.html" class="auth-btn" style="text-align: center; text-decoration: none; display: block;">Accéder à l'administration</a>
                 </div>
+                <p class="form-link">Pas encore de compte ? <a href="#" onclick="showTab('register')">S'inscrire</a></p>
+                <div id="loginMessage" class="form-message" style="display: none;"></div>
             </form>
         </div>
         

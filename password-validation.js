@@ -17,11 +17,96 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     const loginEmail = document.getElementById('loginEmail');
     const loginPassword = document.getElementById('loginPassword');
+    const loginMessage = document.getElementById('loginMessage');
     
     // Register form elements
     const registerForm = document.getElementById('registerForm');
     const registerEmail = document.getElementById('registerEmail');
     const registerName = document.getElementById('registerName');
+    
+    // Gestion de la soumission du formulaire de connexion
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value;
+            
+            // Utiliser la fonction d'authentification
+            const authResult = window.auth && window.auth.authenticate(email, password);
+            
+            if (authResult && authResult.success) {
+                // Afficher le bouton d'administration si l'utilisateur est admin
+                const adminButtonContainer = document.getElementById('adminButtonContainer');
+                if (window.auth.isAdmin() && adminButtonContainer) {
+                    adminButtonContainer.style.display = 'block';
+                    loginMessage.textContent = 'Connexion réussie. Vous pouvez accéder à l\'administration.';
+                    loginMessage.style.display = 'block';
+                    loginMessage.style.color = 'green';
+                    loginMessage.style.marginTop = '10px';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            } else if (authResult && authResult.requireTwoFA) {
+                // Afficher un formulaire pour le code 2FA
+                const twoFAForm = document.createElement('div');
+                twoFAForm.className = 'form-group';
+                twoFAForm.innerHTML = `
+                    <label for="twoFACode">Code d'authentification à deux facteurs :</label>
+                    <input type="text" id="twoFACode" name="twoFACode" placeholder="Entrez le code à 6 chiffres" required>
+                    <button type="button" id="submitTwoFA" class="auth-btn">Vérifier</button>
+                `;
+                
+                // Ajouter le formulaire après le bouton de connexion
+                loginForm.appendChild(twoFAForm);
+                
+                // Gérer la soumission du code 2FA
+                document.getElementById('submitTwoFA').addEventListener('click', function() {
+                    const twoFACode = document.getElementById('twoFACode').value;
+                    const twoFAResult = window.auth.authenticate(email, password, twoFACode);
+                    
+                    if (twoFAResult && twoFAResult.success) {
+                        if (window.auth.isAdmin()) {
+                            adminButtonContainer.style.display = 'block';
+                            loginMessage.textContent = 'Connexion réussie. Vous pouvez accéder à l\'administration.';
+                            loginMessage.style.display = 'block';
+                            loginMessage.style.color = 'green';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    } else if (twoFAResult && twoFAResult.invalidTwoFA) {
+                        loginMessage.textContent = 'Code d\'authentification invalide. Veuillez réessayer.';
+                        loginMessage.style.display = 'block';
+                        loginMessage.style.color = 'red';
+                    }
+                });
+                
+                loginMessage.textContent = 'Veuillez entrer le code d\'authentification à deux facteurs.';
+                loginMessage.style.display = 'block';
+                loginMessage.style.color = 'blue';
+            } else if (authResult && authResult.locked) {
+                // Compte verrouillé
+                const lockTime = new Date(authResult.lockedUntil);
+                const now = new Date();
+                const minutesLeft = Math.ceil((lockTime - now) / 60000);
+                
+                loginMessage.textContent = `Compte temporairement verrouillé. Réessayez dans ${minutesLeft} minute(s).`;
+                loginMessage.style.display = 'block';
+                loginMessage.style.color = 'red';
+            } else if (authResult && authResult.ipNotAllowed) {
+                // IP non autorisée
+                loginMessage.textContent = 'Accès refusé depuis cette adresse IP.';
+                loginMessage.style.display = 'block';
+                loginMessage.style.color = 'red';
+            } else {
+                // Afficher un message d'erreur général
+                loginMessage.textContent = 'Email ou mot de passe incorrect';
+                loginMessage.style.display = 'block';
+                loginMessage.style.color = 'red';
+                loginMessage.style.marginTop = '10px';
+            }
+        });
+    }
     
     // Tab switching function
     window.showTab = function(tabId) {
@@ -166,18 +251,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Vérifier le jeton CSRF si le module est disponible
+            if (window.csrf) {
+                const formId = this.id;
+                const csrfInput = this.querySelector('input[name="csrf_token"]');
+                
+                if (!csrfInput || !window.csrf.validateCSRFToken(formId, csrfInput.value)) {
+                    alert('Erreur de sécurité: jeton CSRF invalide. Veuillez rafraîchir la page et réessayer.');
+                    return;
+                }
+            }
+            
             // In a real application, you would send this to a server for verification
             // This is just a simulation for demonstration purposes
             const email = loginEmail.value;
             const password = loginPassword.value;
             
-            // Simulate authentication (replace with actual authentication)
-            if (email === 'admin@techshield.com' && password === 'Admin@123456') {
+            // Utiliser la fonction d'authentification
+            const authResult = window.auth && window.auth.authenticate(email, password);
+            if (authResult && authResult.success) {
                 // Successful login
                 loginAttempts = 0;
-                alert('Connexion réussie!');
-                // Redirect to dashboard or home page
-                // window.location.href = 'dashboard.html';
+                
+                // Afficher le bouton d'administration si l'utilisateur est admin
+                const adminButtonContainer = document.getElementById('adminButtonContainer');
+                if (window.auth.isAdmin() && adminButtonContainer) {
+                    adminButtonContainer.style.display = 'block';
+                    loginMessage.textContent = 'Connexion réussie. Vous pouvez accéder à l\'administration.';
+                    loginMessage.style.display = 'block';
+                    loginMessage.style.color = 'green';
+                    loginMessage.style.marginTop = '10px';
+                    alert('Connexion réussie! Vous pouvez accéder à l\'administration.');
+                } else {
+                    window.location.href = 'index.html';
+                }
             } else {
                 // Failed login
                 loginAttempts++;

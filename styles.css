@@ -326,24 +326,34 @@ footer {
 
 /* À propos */
 .about-container {
-    max-width: 8000px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
     line-height: 1.6;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
     text-align: left;
     flex-direction: row-reverse;
+    gap: 30px;
 }
 
 .about-text {
     flex: 1;
+    padding: 0 10px;
+}
+
+.about-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .about-image img {
-    max-width: 500px;
+    max-width: 100%;
+    height: auto;
     border-radius: 50%;
-    margin-left: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
@@ -362,14 +372,15 @@ h2 {
     justify-content: center;
     align-items: center;
     animation: fadeIn 0.5s ease-in-out;
+    z-index: 1000;
 }
 
 .cv-modal:target, .modal-form:target {
     display: flex;
 }
 
-.cv-content, .modal-content {
-    background: none²k;
+.cv-content {
+    background: none;
     padding: 20px;
     border-radius: 10px;
     width: 20%;
@@ -377,6 +388,18 @@ h2 {
     text-align: center;
     position: relative;
     animation: zoomIn 0.3s ease-in-out;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+    animation: zoomIn 0.3s ease-in-out;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 .cv-content img {
     max-width: 100%;
@@ -393,43 +416,64 @@ h2 {
 .close-btn {
     position: absolute;
     top: 10px;
-    right: 1px;
-    left: 130%;
+    right: 10px;
     font-size: 24px;
     text-decoration: none;
-    color: #333;
+    color: red;
     font-weight: bold;
-    bottom: 20px;
     background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
 }
 
 .close-btn:hover {
-    color: red;
-    background: lightgray;
+    color: darkred;
+    transform: scale(1.1);
 }
 
 /* Formulaire */
 input, textarea {
     width: 100%;
-    padding: 8px;
+    padding: 12px;
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 16px;
+    transition: border 0.3s ease;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #feb47b;
+    box-shadow: 0 0 5px rgba(254, 180, 123, 0.5);
+}
+
+label {
+    display: block;
+    text-align: left;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
 }
 
 .send-btn {
     width: 100%;
-    padding: 10px;
-    background: #28a745;
+    padding: 12px;
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 15px;
 }
 
 .send-btn:hover {
-    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Pied de page */
@@ -446,10 +490,62 @@ footer {
 /* Responsive Design */
 @media screen and (max-width: 1024px) {
     body { font-size: 16px; }
+    
+    .about-container {
+        padding: 30px 15px;
+    }
+    
+    .about-image img {
+        max-width: 350px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .about-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .about-text {
+        order: 2;
+    }
+    
+    .about-image {
+        order: 1;
+        margin-bottom: 20px;
+    }
+    
+    .about-image img {
+        max-width: 250px;
+    }
 }
 
 @media screen and (max-width: 600px) {
     body { font-size: 14px; }
+    
+    .about-container {
+        padding: 20px 10px;
+    }
+    
+    .about-image img {
+        max-width: 200px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        max-width: 350px;
+    }
+    
+    input, textarea {
+        padding: 10px;
+    }
+    
+    .close-btn {
+        font-size: 28px;
+        top: 5px;
+        right: 10px;
+    }
 }
 @media (max-width: 600px) {
     nav {
