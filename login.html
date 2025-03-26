@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tech Shield - Connexion et inscription">
+    <title>Tech Shield - Connexion</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="login-styles.css">
+    <script defer src="script.js"></script>
+    <script defer src="password-validation.js"></script>
+</head>
+<body>
+    <header class="fixed-header">
+        <div class="burger-menu" aria-label="Menu">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+        <div class="logo" onclick="scrollToTop()" aria-label="Retour en haut">
+            <img src="logo.png" alt="Tech Shield Logo">
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+                <li><a href="index.html#portfolio">Nos Portfolios</a></li>
+                <li><a href="index.html#realizations">Nos Réalisations</a></li>
+                <li><a href="index.html#about">À propos de nous</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="auth-container">
+        <div class="auth-tabs">
+            <button class="tab-btn active" onclick="showTab('login')">Connexion</button>
+            <button class="tab-btn" onclick="showTab('register')">Inscription</button>
+        </div>
+        
+        <div id="login" class="auth-form active">
+            <h2>Connexion</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email :</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe :</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="auth-btn">Se connecter</button>
+                </div>
+                <p class="form-link">Pas encore de compte ? <a href="#" onclick="showTab('register')">S'inscrire</a></p>
+                <div class="form-group">
+                    <a href="admin.html" class="auth-btn">Administration</a>
+                </div>
+            </form>
+        </div>
+        
+        <div id="register" class="auth-form">
+            <h2>Inscription</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Nom complet :</label>
+                    <input type="text" id="registerName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email :</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Mot de passe :</label>
+                    <input type="password" id="registerPassword" name="password" required>
+                    <div class="password-strength-meter">
+                        <div class="strength-bar"></div>
+                    </div>
+                    <div class="password-requirements">
+                        <p>Votre mot de passe doit contenir :</p>
+                        <ul>
+                            <li id="length">Au moins 12 caractères</li>
+                            <li id="uppercase">Au moins une lettre majuscule</li>
+                            <li id="lowercase">Au moins une lettre minuscule</li>
+                            <li id="number">Au moins un chiffre</li>
+                            <li id="special">Au moins un caractère spécial (!@#$%^&*)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmer le mot de passe :</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <p id="password-match-message"></p>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="auth-btn" id="registerButton" disabled>S'inscrire</button>
+                </div>
+                <p class="form-link">Déjà inscrit ? <a href="#" onclick="showTab('login')">Se connecter</a></p>
+            </form>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; Tech Shield. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

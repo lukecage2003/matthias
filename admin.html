@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tech Shield - Interface d'administration">
+    <title>Tech Shield - Administration</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <script defer src="script.js"></script>
+    <script defer src="admin.js"></script>
+</head>
+<body>
+    <header class="fixed-header">
+        <div class="burger-menu" aria-label="Menu">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+        <div class="logo" onclick="scrollToTop()" aria-label="Retour en haut">
+            <img src="logo.png" alt="Tech Shield Logo">
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="admin.html" class="active">Administration</a></li>
+                <li><a href="#" id="logoutBtn">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-header">
+            <h1>Tableau de bord d'administration</h1>
+            <div class="admin-user-info">
+                <span id="adminUsername">Admin</span>
+                <span id="lastLogin">Dernière connexion: 01/01/2023 12:00</span>
+            </div>
+        </div>
+
+        <nav class="admin-nav">
+            <ul>
+                <li><a href="#" class="active" data-tab="security">Sécurité</a></li>
+                <li><a href="#" data-tab="users">Utilisateurs</a></li>
+                <li><a href="#" data-tab="logs">Journaux</a></li>
+                <li><a href="#" data-tab="settings">Paramètres</a></li>
+            </ul>
+        </nav>
+
+        <div class="admin-content">
+            <!-- Security Tab -->
+            <div id="security" class="admin-tab active">
+                <div class="admin-card">
+                    <h2>Paramètres de sécurité</h2>
+                    <div class="security-settings">
+                        <!-- 2FA Settings -->
+                        <div class="security-card">
+                            <h3>Authentification à deux facteurs (2FA)</h3>
+                            <p>Protégez votre compte avec une couche de sécurité supplémentaire.</p>
+                            <div class="twofa-status">
+                                <span>Statut: </span>
+                                <span id="twofaStatus" class="status-enabled">Activé</span>
+                            </div>
+                            <button id="configureTwoFA" class="admin-btn">Configurer 2FA</button>
+                            
+                            <div id="twofaSetup" class="twofa-setup" style="display: none;">
+                                <div class="qr-code">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=otpauth://totp/Tech-Shield:admin@techshield.com?secret=JBSWY3DPEHPK3PXP&issuer=Tech-Shield" alt="QR Code pour 2FA">
+                                </div>
+                                <div class="twofa-instructions">
+                                    <p>Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, etc.)</p>
+                                    <ol>
+                                        <li>Téléchargez une application d'authentification</li>
+                                        <li>Scannez le QR code</li>
+                                        <li>Entrez le code généré ci-dessous</li>
+                                    </ol>
+                                    <div class="form-group">
+                                        <input type="text" id="twofaCode" placeholder="Code à 6 chiffres">
+                                        <button id="verifyTwoFA" class="admin-btn">Vérifier</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- IP Whitelist -->
+                        <div class="security-card">
+                            <h3>Liste blanche d'adresses IP</h3>
+                            <p>Limitez l'accès à l'interface d'administration à des adresses IP spécifiques.</p>
+                            <div class="ip-list">
+                                <div class="ip-item">
+                                    <span>192.168.1.1</span>
+                                    <div class="ip-actions">
+                                        <button class="remove-ip">Supprimer</button>
+                                    </div>
+                                </div>
+                                <div class="ip-item">
+                                    <span>10.0.0.1</span>
+                                    <div class="ip-actions">
+                                        <button class="remove-ip">Supprimer</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="newIP" placeholder="Ajouter une nouvelle IP">
+                                <button id="addIP" class="admin-btn">Ajouter</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Password Policy -->
+                        <div class="security-card">
+                            <h3>Politique de mot de passe</h3>
+                            <p>Définissez les exigences de complexité pour les mots de passe.</p>
+                            <form class="admin-form">
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="requireLength" checked disabled>
+                                        Minimum 12 caractères
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="requireUppercase" checked disabled>
+                                        Au moins une majuscule
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="requireLowercase" checked disabled>
+                                        Au moins une minuscule
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="requireNumber" checked disabled>
+                                        Au moins un chiffre
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="requireSpecial" checked disabled>
+                                        Au moins un caractère spécial
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Login Attempts -->
+                        <div class="security-card">
+                            <h3>Tentatives de connexion</h3>
+                            <p>Limitez le nombre de tentatives de connexion pour prévenir les attaques par force brute.</p>
+                            <form class="admin-form">
+                                <div class="form-group">
+                                    <label for="maxAttempts">Nombre maximum de tentatives :</label>
+                                    <input type="number" id="maxAttempts" value="5" min="1" max="10">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lockoutTime">Durée de verrouillage (minutes) :</label>
+                                    <input type="number" id="lockoutTime" value="15" min="5" max="60">
+                                </div>
+                                <button type="button" id="saveLoginAttempts" class="admin-btn">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Users Tab -->
+            <div id="users" class="admin-tab">
+                <div class="admin-card">
+                    <h2>Gestion des utilisateurs</h2>
+                    <p>Fonctionnalité à venir...</p>
+                </div>
+            </div>
+            
+            <!-- Logs Tab -->
+            <div id="logs" class="admin-tab">
+                <div class="admin-card">
+                    <h2>Journaux de connexion</h2>
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>Date/Heure</th>
+                                <th>Utilisateur</th>
+                                <th>Adresse IP</th>
+                                <th>Statut</th>
+                                <th>Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>01/01/2023 12:00</td>
+                                <td>admin@techshield.com</td>
+                                <td>192.168.1.1</td>
+                                <td><span class="log-status log-success">Succès</span></td>
+                                <td>Connexion réussie</td>
+                            </tr>
+                            <tr>
+                                <td>01/01/2023 11:55</td>
+                                <td>admin@techshield.com</td>
+                                <td>10.0.0.2</td>
+                                <td><span class="log-status log-failed">Échec</span></td>
+                                <td>Mot de passe incorrect</td>
+                            </tr>
+                            <tr>
+                                <td>01/01/2023 11:50</td>
+                                <td>unknown@example.com</td>
+                                <td>203.0.113.1</td>
+                                <td><span class="log-status log-suspicious">Suspect</span></td>
+                                <td>Tentative depuis une IP non autorisée</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div id="settings" class="admin-tab">
+                <div class="admin-card">
+                    <h2>Paramètres généraux</h2>
+                    <p>Fonctionnalité à venir...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; Tech Shield. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

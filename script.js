@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector(".logo").addEventListener("click", function () {
         window.scrollTo({ top: 0, behavior: "smooth" });
     });
+    
+    // Fonction pour le scroll vers le haut
+    window.scrollToTop = function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     // Gestion de l'upload avec affichage du nom du fichier sélectionné
     const cvInput = document.getElementById("cvInput");
@@ -63,11 +68,49 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 100);
     });
 });
-ducument.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const burger = document.querySelector(".burger-menu");
     const navlinks = document.querySelector(".nav-links");
 
     burger.addEventListener("click", function () {
+        burger.classList.toggle("open");
         navlinks.classList.toggle("active");
     });
 });
+
+// Fonction pour ouvrir la modale CV
+function openModal(cvFile) {
+    document.getElementById('cvFrame').src = cvFile;
+    document.getElementById('downloadLink').href = cvFile;
+    document.getElementById('cvModal').style.display = 'flex';
+}
+
+// Fonction pour fermer la modale CV
+function closeModal() {
+    document.getElementById('cvModal').style.display = 'none';
+    document.getElementById('cvFrame').src = '';
+}
+
+// Fonction pour afficher/masquer les détails des réalisations
+function toggleDetails(id) {
+    var details = document.getElementById(id);
+    if (details.style.display === "none") {
+        details.style.display = "block";
+    } else {
+        details.style.display = "none";
+    }
+}
+
+// Fonction pour afficher/masquer le PDF
+function togglePdf(pdfUrl) {
+    var pdfContainer = document.getElementById('pdfContainer');
+    var pdfViewer = document.getElementById('pdfViewer');
+
+    if (pdfContainer.style.display === 'none' || pdfContainer.style.display === '') {
+        pdfViewer.src = pdfUrl;
+        pdfContainer.style.display = 'block';
+    } else {
+        pdfViewer.src = '';
+        pdfContainer.style.display = 'none';
+    }
+}
