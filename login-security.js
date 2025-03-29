@@ -27,7 +27,22 @@ const loginSecurityConfig = {
     detectBruteForce: true,
     
     // Seuil pour la détection d'attaque par force brute (tentatives par minute)
-    bruteForceTreshold: 10
+    bruteForceTreshold: 10,
+    
+    // Système de blocage progressif
+    enableProgressiveBlocking: true,
+    
+    // Facteur multiplicateur pour le temps de blocage progressif
+    progressiveBlockingFactor: 2,
+    
+    // Durée maximale de blocage (en minutes)
+    maxBlockDuration: 120,
+    
+    // Nombre de tentatives avant d'afficher un avertissement
+    warningThreshold: 3,
+    
+    // Activer le stockage persistant des tentatives (localStorage)
+    persistentStorage: true
 };
 
 // Stockage des tentatives de connexion
@@ -42,6 +57,11 @@ const knownBrowsers = {};
 // Fonction pour enregistrer une tentative de connexion
 function recordLoginAttempt(email, ipAddress, userAgent, success) {
     const now = new Date();
+    
+    // Charger les tentatives depuis le localStorage si la persistance est activée
+    if (loginSecurityConfig.persistentStorage) {
+        loadLoginAttemptsFromStorage();
+    }
     
     // Initialiser l'entrée si elle n'existe pas
     if (!loginAttempts[email]) {
@@ -58,6 +78,11 @@ function recordLoginAttempt(email, ipAddress, userAgent, success) {
     
     // Nettoyer les anciennes tentatives
     cleanOldAttempts(email);
+    
+    // Sauvegarder les tentatives dans le localStorage si la persistance est activée
+    if (loginSecurityConfig.persistentStorage) {
+        saveLoginAttemptsToStorage();
+    }
     
     // Vérifier si l'utilisateur doit être bloqué
     return checkForBlocking(email, ipAddress);
@@ -88,36 +113,74 @@ function checkForBlocking(email, ipAddress) {
     
     const failedAttempts = loginAttempts[email].filter(attempt => !attempt.success);
     
-    if (failedAttempts.length >= loginSecurityConfig.maxLoginAttempts) {
-        // Bloquer l'IP
-        blockIP(ipAddress);
+    // Vérifier si l'utilisateur doit recevoir un avertissement
+    if (failedAttempts.length >= loginSecurityConfig.warningThreshold && 
+        failedAttempts.length < loginSecurityConfig.maxLoginAttempts) {
+        const remainingAttempts = loginSecurityConfig.maxLoginAttempts - failedAttempts.length;
         
-        // Calculer le temps restant du blocage
-        const blockExpiryTime = new Date();
-        blockExpiryTime.setMinutes(blockExpiryTime.getMinutes() + loginSecurityConfig.temporaryBlockDuration);
-        
-        return { 
-            blocked: true, 
-            reason: 'Trop de tentatives de connexion échouées', 
-            expiresAt: blockExpiryTime.toISOString(),
-            remainingMinutes: loginSecurityConfig.temporaryBlockDuration
+        return {
+            blocked: false,
+            warning: true,
+            reason: `Attention: ${remainingAttempts} tentative(s) restante(s) avant blocage temporaire`,
+            remainingAttempts: remainingAttempts
         };
+    }
+    
+    if (failedAttempts.length >= loginSecurityConfig.maxLoginAttempts) {
+        // Récupérer le nombre de tentatives précédentes pour cette IP
+        let previousAttempts = 0;
+        
+        // Vérifier si cette IP a déjà été bloquée auparavant
+        const previousBlockInfo = Object.entries(blockedIPs).find(([ip, info]) => ip === ipAddress);
+        if (previousBlockInfo) {
+            const blockInfo = previousBlockInfo[1];
+            previousAttempts = typeof blockInfo === 'string' ? 1 : blockInfo.attempts;
+        }
+        
+        // Bloquer l'IP avec le nombre de tentatives précédentes
+        blockIP(ipAddress, previousAttempts);
+        
+        // Récupérer les informations de blocage mises à jour
+        const updatedBlockStatus = isIPBlocked(ipAddress);
+        
+        return updatedBlockStatus;
     }
     
     return { blocked: false };
 }
 
 // Fonction pour bloquer temporairement une adresse IP
-function blockIP(ipAddress) {
-    const expiryTime = new Date();
-    expiryTime.setMinutes(expiryTime.getMinutes() + loginSecurityConfig.temporaryBlockDuration);
+function blockIP(ipAddress, previousAttempts = 0) {
+    // Calculer la durée du blocage en fonction du nombre de tentatives précédentes
+    let blockDuration = loginSecurityConfig.temporaryBlockDuration;
     
-    blockedIPs[ipAddress] = expiryTime.toISOString();
+    // Si le blocage progressif est activé, augmenter la durée en fonction des tentatives précédentes
+    if (loginSecurityConfig.enableProgressiveBlocking && previousAttempts > 0) {
+        // Augmenter la durée de blocage en fonction du facteur multiplicateur et du nombre de tentatives précédentes
+        blockDuration = Math.min(
+            loginSecurityConfig.temporaryBlockDuration * Math.pow(loginSecurityConfig.progressiveBlockingFactor, previousAttempts),
+            loginSecurityConfig.maxBlockDuration
+        );
+    }
+    
+    const expiryTime = new Date();
+    expiryTime.setMinutes(expiryTime.getMinutes() + blockDuration);
+    
+    // Stocker l'information de blocage avec le nombre de tentatives précédentes
+    blockedIPs[ipAddress] = {
+        expiresAt: expiryTime.toISOString(),
+        attempts: previousAttempts + 1
+    };
     
     // Enregistrer le blocage dans les logs si disponible
     if (window.securityLogs) {
         window.securityLogs.addLoginLog('système', ipAddress, window.securityLogs.LOG_TYPES.WARNING, 
-            `IP bloquée temporairement pour ${loginSecurityConfig.temporaryBlockDuration} minutes suite à trop de tentatives échouées`);
+            `IP bloquée temporairement pour ${blockDuration} minutes suite à trop de tentatives échouées`);
+    }
+    
+    // Stocker les informations de blocage dans le localStorage si la persistance est activée
+    if (loginSecurityConfig.persistentStorage) {
+        saveBlockedIPsToStorage();
     }
     
     return true;
@@ -125,8 +188,15 @@ function blockIP(ipAddress) {
 
 // Fonction pour vérifier si une IP est bloquée
 function isIPBlocked(ipAddress) {
+    // Charger les IPs bloquées depuis le localStorage si la persistance est activée
+    if (loginSecurityConfig.persistentStorage) {
+        loadBlockedIPsFromStorage();
+    }
+    
     if (blockedIPs[ipAddress]) {
-        const blockExpiryTime = new Date(blockedIPs[ipAddress]);
+        // Récupérer les informations de blocage
+        const blockInfo = blockedIPs[ipAddress];
+        const blockExpiryTime = new Date(typeof blockInfo === 'string' ? blockInfo : blockInfo.expiresAt);
         const now = new Date();
         
         if (now < blockExpiryTime) {
@@ -134,15 +204,24 @@ function isIPBlocked(ipAddress) {
             const remainingMs = blockExpiryTime - now;
             const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
             
+            // Récupérer le nombre de tentatives précédentes
+            const attempts = typeof blockInfo === 'string' ? 1 : blockInfo.attempts;
+            
             return { 
                 blocked: true, 
                 reason: 'Adresse IP temporairement bloquée', 
-                expiresAt: blockedIPs[ipAddress],
-                remainingMinutes: remainingMinutes
+                expiresAt: typeof blockInfo === 'string' ? blockInfo : blockInfo.expiresAt,
+                remainingMinutes: remainingMinutes,
+                attempts: attempts
             };
         } else {
             // Le blocage a expiré, supprimer l'entrée
             delete blockedIPs[ipAddress];
+            
+            // Mettre à jour le localStorage si la persistance est activée
+            if (loginSecurityConfig.persistentStorage) {
+                saveBlockedIPsToStorage();
+            }
         }
     }
     
@@ -295,6 +374,58 @@ function unblockIP(ipAddress) {
     return false;
 }
 
+// Fonction pour sauvegarder les IPs bloquées dans le localStorage
+function saveBlockedIPsToStorage() {
+    if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('blockedIPs', JSON.stringify(blockedIPs));
+    }
+}
+
+// Fonction pour charger les IPs bloquées depuis le localStorage
+function loadBlockedIPsFromStorage() {
+    if (typeof localStorage !== 'undefined') {
+        const storedBlockedIPs = localStorage.getItem('blockedIPs');
+        if (storedBlockedIPs) {
+            // Fusionner avec les IPs bloquées actuelles
+            const parsedBlockedIPs = JSON.parse(storedBlockedIPs);
+            Object.assign(blockedIPs, parsedBlockedIPs);
+        }
+    }
+}
+
+// Fonction pour sauvegarder les tentatives de connexion dans le localStorage
+function saveLoginAttemptsToStorage() {
+    if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('loginAttempts', JSON.stringify(loginAttempts));
+    }
+}
+
+// Fonction pour charger les tentatives de connexion depuis le localStorage
+function loadLoginAttemptsFromStorage() {
+    if (typeof localStorage !== 'undefined') {
+        const storedLoginAttempts = localStorage.getItem('loginAttempts');
+        if (storedLoginAttempts) {
+            // Fusionner avec les tentatives actuelles
+            const parsedLoginAttempts = JSON.parse(storedLoginAttempts);
+            Object.assign(loginAttempts, parsedLoginAttempts);
+        }
+    }
+}
+
+// Fonction pour obtenir le nombre de tentatives restantes avant blocage
+function getRemainingAttempts(email) {
+    if (!loginAttempts[email]) return loginSecurityConfig.maxLoginAttempts;
+    
+    const failedAttempts = loginAttempts[email].filter(attempt => !attempt.success).length;
+    return Math.max(0, loginSecurityConfig.maxLoginAttempts - failedAttempts);
+}
+
+// Initialisation: charger les données depuis le localStorage si la persistance est activée
+if (loginSecurityConfig.persistentStorage) {
+    loadBlockedIPsFromStorage();
+    loadLoginAttemptsFromStorage();
+}
+
 // Exporter les fonctions pour les utiliser dans d'autres fichiers
 window.loginSecurity = {
     recordLoginAttempt,
@@ -305,5 +436,10 @@ window.loginSecurity = {
     resetUserLoginAttempts,
     blockIP,
     unblockIP,
+    getRemainingAttempts,
+    saveBlockedIPsToStorage,
+    loadBlockedIPsFromStorage,
+    saveLoginAttemptsToStorage,
+    loadLoginAttemptsFromStorage,
     config: loginSecurityConfig
 };

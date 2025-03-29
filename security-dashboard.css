@@ -1,0 +1,355 @@
+/* Styles pour le tableau de bord de sécurité et les notifications */
+
+/* Conteneur des notifications de sécurité */
+.security-notifications {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 350px;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+}
+
+/* Style des notifications */
+.security-notification {
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Types de notifications */
+.security-notification.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.security-notification.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.security-notification.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.security-notification.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Icône de notification */
+.notification-icon {
+    font-size: 18px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+/* Contenu de la notification */
+.notification-content {
+    flex: 1;
+}
+
+.notification-message {
+    margin-bottom: 5px;
+}
+
+.notification-time {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Bouton de fermeture */
+.notification-close {
+    cursor: pointer;
+    margin-left: auto;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Animation de secousse pour les erreurs */
+.shake-animation {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Compteur de tentatives */
+.attempt-counter {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.attempt-counter.warning {
+    color: #856404;
+    font-weight: bold;
+}
+
+/* Statistiques de sécurité */
+.security-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    flex: 1;
+    min-width: 150px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Tableau des logs */
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.log-table th {
+    background-color: #f8f9fa;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.log-table td {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.log-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Statuts des logs */
+.log-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.log-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.log-failed {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.log-suspicious {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.log-warning {
+    background-color: #ffe8d9;
+    color: #d46b08;
+}
+
+.log-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Logs en temps réel */
+.realtime-logs {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.realtime-log-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+}
+
+.realtime-log-item.new {
+    animation: highlight 2s ease-out;
+}
+
+@keyframes highlight {
+    0% { background-color: #fff3cd; }
+    100% { background-color: transparent; }
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.log-user {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.log-ip {
+    color: #666;
+    font-size: 12px;
+}
+
+.log-time {
+    color: #666;
+    font-size: 12px;
+}
+
+.log-message {
+    font-size: 14px;
+}
+
+/* Gestion de la liste blanche d'IP */
+.ip-list {
+    margin-top: 20px;
+}
+
+.ip-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.ip-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ip-address {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.ip-description {
+    font-size: 14px;
+    color: #666;
+}
+
+.expiry-date {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.permanent-badge {
+    display: inline-block;
+    background-color: #d1ecf1;
+    color: #0c5460;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.ip-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.remove-ip {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.remove-ip:hover {
+    background-color: #f5c6cb;
+}
+
+/* Formulaire d'ajout d'IP */
+.add-ip-form {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.form-row input[type="text"] {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.form-row button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-row button:hover {
+    background-color: #0069d9;
+}
+
+/* Mode de liste blanche */
+.whitelist-mode {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.mode-strict {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.mode-normal {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}

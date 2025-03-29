@@ -8,6 +8,14 @@ const cookieConfig = {
     maxAge: 3600000     // Durée de vie du cookie (1 heure)
 };
 
+// Vérifier si la configuration centralisée est disponible
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.securityConfig && window.securityConfig.csrfProtection && window.securityConfig.csrfProtection.cookies) {
+        // Appliquer la configuration centralisée
+        Object.assign(cookieConfig, window.securityConfig.csrfProtection.cookies);
+    }
+});
+
 // Stockage des jetons CSRF (dans un environnement de production, cela serait géré côté serveur)
 const csrfTokens = {};
 
@@ -27,17 +35,15 @@ function setSecureCookie(name, value, options = {}) {
         cookieString += `; max-age=${mergedOptions.maxAge}`;
     }
     
-    if (mergedOptions.secure) {
-        cookieString += '; secure';
-    }
+    // Toujours activer l'option secure pour les cookies
+    cookieString += '; secure';
     
-    if (mergedOptions.httpOnly) {
-        cookieString += '; httpOnly';
-    }
+    // Toujours activer l'option httpOnly pour les cookies
+    cookieString += '; httpOnly';
     
-    if (mergedOptions.sameSite) {
-        cookieString += `; samesite=${mergedOptions.sameSite}`;
-    }
+    // Définir sameSite à 'strict' par défaut pour une meilleure protection
+    const sameSiteValue = mergedOptions.sameSite || 'strict';
+    cookieString += `; samesite=${sameSiteValue}`;
     
     document.cookie = cookieString;
 }
@@ -104,7 +110,7 @@ function validateCSRFToken(formId, token) {
 }
 
 // Fonction pour régénérer l'ID de session après connexion
-function regenerateSessionId() {
+function regenerateSessionId(maxAge = 3600) {
     // Générer un nouvel ID de session
     const newSessionId = generateCSRFToken();
     
@@ -130,7 +136,22 @@ function regenerateSessionId() {
     sessionStorage.setItem('sessionId', newSessionId);
     
     // Définir également un cookie de session sécurisé
-    setSecureCookie('sessionId', newSessionId);
+    // Utiliser les options de sécurité maximales pour le cookie de session
+    setSecureCookie('sessionId', newSessionId, {
+        maxAge: maxAge,
+        secure: true,
+        httpOnly: true,
+        sameSite: 'strict'
+    });
+    
+    // Enregistrer la régénération dans les logs si disponible
+    if (window.securityLogs) {
+        const clientIP = window.ipWhitelist ? window.ipWhitelist.getClientIP() : '127.0.0.1';
+        window.securityLogs.addLoginLog(sessionStorage.getItem('userEmail') || 'système', 
+            clientIP, 
+            window.securityLogs.LOG_TYPES.INFO, 
+            'ID de session régénéré');
+    }
     
     return newSessionId;
 }

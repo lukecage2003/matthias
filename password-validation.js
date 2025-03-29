@@ -26,11 +26,46 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Gestion de la soumission du formulaire de connexion
     if (loginForm) {
+        // Ajouter un compteur de tentatives sous le formulaire
+        const attemptCounter = document.createElement('div');
+        attemptCounter.className = 'attempt-counter';
+        loginForm.appendChild(attemptCounter);
+        
+        // Fonction pour mettre à jour le compteur de tentatives
+        function updateAttemptCounter(email) {
+            if (window.loginSecurity && window.loginSecurity.getRemainingAttempts) {
+                const remainingAttempts = window.loginSecurity.getRemainingAttempts(email);
+                attemptCounter.textContent = `Tentatives restantes: ${remainingAttempts}`;
+                
+                // Ajouter une classe d'avertissement si le nombre de tentatives est faible
+                if (remainingAttempts <= window.loginSecurity.config.warningThreshold) {
+                    attemptCounter.classList.add('warning');
+                } else {
+                    attemptCounter.classList.remove('warning');
+                }
+                
+                attemptCounter.style.display = 'block';
+            } else {
+                attemptCounter.style.display = 'none';
+            }
+        }
+        
+        // Mettre à jour le compteur lorsque l'email change
+        loginEmail.addEventListener('blur', function() {
+            const email = this.value.trim();
+            if (email) {
+                updateAttemptCounter(email);
+            }
+        });
+        
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
             const email = loginEmail.value.trim();
             const password = loginPassword.value;
+            
+            // Mettre à jour le compteur de tentatives
+            updateAttemptCounter(email);
             
             // Utiliser la fonction d'authentification
             const authResult = window.auth && window.auth.authenticate(email, password);
@@ -93,6 +128,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 loginMessage.textContent = `Compte temporairement verrouillé. Réessayez dans ${minutesLeft} minute(s).`;
                 loginMessage.style.display = 'block';
                 loginMessage.style.color = 'red';
+                loginMessage.classList.add('shake-animation');
+            } else if (authResult && authResult.ipBlocked) {
+                // IP bloquée par le système de sécurité
+                const blockStatus = authResult.blockStatus;
+                const minutesLeft = blockStatus.remainingMinutes;
+                const attempts = blockStatus.attempts || 1;
+                
+                let message = `Adresse IP temporairement bloquée suite à trop de tentatives échouées. `;
+                message += `Réessayez dans ${minutesLeft} minute(s).`;
+                
+                if (attempts > 1) {
+                    message += ` Ceci est votre ${attempts}e blocage.`;
+                }
+                
+                loginMessage.textContent = message;
+                loginMessage.style.display = 'block';
+                loginMessage.style.color = 'red';
+                loginMessage.classList.add('shake-animation');
+            } else if (authResult && authResult.warning) {
+                // Avertissement avant blocage
+                loginMessage.textContent = authResult.reason;
+                loginMessage.style.display = 'block';
+                loginMessage.style.color = 'orange';
             } else if (authResult && authResult.ipNotAllowed) {
                 // IP non autorisée
                 loginMessage.textContent = 'Accès refusé depuis cette adresse IP.';

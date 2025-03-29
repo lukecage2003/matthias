@@ -54,6 +54,20 @@ function authenticate(email, password, twofaCode = null) {
                     blockStatus: blockStatus
                 };
             }
+            
+            // Vérifier s'il y a un avertissement sur le nombre de tentatives restantes
+            if (window.loginSecurity.getRemainingAttempts) {
+                const remainingAttempts = window.loginSecurity.getRemainingAttempts(email);
+                if (remainingAttempts <= loginSecurityConfig.warningThreshold && remainingAttempts > 0) {
+                    // Ajouter l'information sur les tentatives restantes
+                    return {
+                        success: false,
+                        warning: true,
+                        reason: `Attention: ${remainingAttempts} tentative(s) restante(s) avant blocage temporaire`,
+                        remainingAttempts: remainingAttempts
+                    };
+                }
+            }
         }
         
         // Vérifier si l'IP est dans la liste blanche pour les comptes admin
@@ -119,6 +133,11 @@ function authenticate(email, password, twofaCode = null) {
             
             // Mettre à jour la date de dernière connexion
             users[email].lastLogin = new Date().toLocaleString();
+            
+            // Régénérer l'ID de session pour prévenir la fixation de session
+            if (window.csrf && window.csrf.regenerateSessionId) {
+                window.csrf.regenerateSessionId();
+            }
             
             // Stocker les informations de session
             sessionStorage.setItem('isLoggedIn', 'true');

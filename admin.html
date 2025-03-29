@@ -7,24 +7,28 @@
     <title>Tech Shield - Administration</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="security-dashboard.css">
+    <link rel="stylesheet" href="alert-styles.css">
     <script defer src="script.js"></script>
     <script defer src="auth.js"></script>
     <script defer src="twofa.js"></script>
+    <script defer src="csrf.js"></script>
     <script defer src="security-logs.js"></script>
-    <script defer src="ip-config.js"></script>
+    <script defer src="advanced-security-logs.js"></script>
     <script defer src="ip-whitelist.js"></script>
     <script defer src="user-permissions.js"></script>
-    <script defer src="advanced-security-logs.js"></script>
-    <script defer src="login-security.js"></script>
-    <script defer src="events.js"></script>
-    <script defer src="admin-events.js"></script>
+    <script defer src="security-alert-system.js"></script>
+    <script defer src="security-alert-system-ui.js"></script>
     <script defer src="security-dashboard.js"></script>
+    <script defer src="security-config.js"></script>
+    <script defer src="security-integration.js"></script>
+    <script defer src="security-monitor.js"></script>
+    <script defer src="security-system-init.js"></script>
+    <script defer src="security-admin.js"></script>
+    <script defer src="security-alerts-handler.js"></script>
     <script defer src="admin.js"></script>
     
-    <!-- FullCalendar.js -->    
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/fr.js"></script>
+
 </head>
 <body>
     <header class="fixed-header">
@@ -46,320 +50,203 @@
     </header>
 
     <main class="admin-container">
-        <div class="admin-header">
-            <h1>Tableau de bord d'administration</h1>
-            <div class="admin-user-info">
-                <span id="adminUsername">Admin</span>
-                <span id="lastLogin">Dernière connexion: 01/01/2023 12:00</span>
-            </div>
-        </div>
 
         <nav class="admin-nav">
             <ul>
                 <li><a href="#" class="active" data-tab="security">Sécurité</a></li>
-                <li><a href="#" data-tab="users">Utilisateurs</a></li>
-                <li><a href="#" data-tab="logs">Journaux</a></li>
-                <li><a href="#" data-tab="events">Événements</a></li>
-                <li><a href="#" data-tab="settings">Paramètres</a></li>
             </ul>
         </nav>
 
         <div class="admin-content">
             <!-- Security Tab -->
             <div id="security" class="admin-tab active">
-                <div class="admin-card">
-                    <h2>Paramètres de sécurité</h2>
-                    <div class="security-settings">
-                        <!-- 2FA Settings -->
-                        <div class="security-card">
-                            <h3>Authentification à deux facteurs (2FA)</h3>
-                            <p>Protégez votre compte avec une couche de sécurité supplémentaire.</p>
-                            <div class="twofa-status">
-                                <span>Statut: </span>
-                                <span id="twofaStatus" class="status-disabled">Désactivé</span>
-                            </div>
-                            <div class="twofa-buttons">
-                                <button id="configureTwoFA" class="admin-btn">Configurer 2FA</button>
-                                <button id="disableTwoFA" class="admin-btn cancel-btn">Désactiver 2FA</button>
-                            </div>
-                            
-                            <div id="twofaSetup" class="twofa-setup" style="display: none;">
-                                <div class="qr-code">
-                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=otpauth://totp/Tech-Shield:admin@techshield.com?secret=JBSWY3DPEHPK3PXP&issuer=Tech-Shield" alt="QR Code pour 2FA">
-                                </div>
-                                <div class="twofa-instructions">
-                                    <p>Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, etc.)</p>
-                                    <ol>
-                                        <li>Téléchargez une application d'authentification</li>
-                                        <li>Scannez le QR code</li>
-                                        <li>Entrez le code généré ci-dessous</li>
-                                    </ol>
-                                    <div class="form-group">
-                                        <input type="text" id="twofaCode" placeholder="Code à 6 chiffres">
-                                        <button id="verifyTwoFA" class="admin-btn">Vérifier</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- IP Whitelist -->
-                        <div class="security-card">
-                            <h3>Liste blanche d'adresses IP</h3>
-                            <p>Limitez l'accès à l'interface d'administration à des adresses IP spécifiques.</p>
-                            <div class="ip-list">
-                                <div class="ip-item">
-                                    <span>192.168.1.1</span>
-                                    <div class="ip-actions">
-                                        <button class="remove-ip">Supprimer</button>
-                                    </div>
-                                </div>
-                                <div class="ip-item">
-                                    <span>10.0.0.1</span>
-                                    <div class="ip-actions">
-                                        <button class="remove-ip">Supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <input type="text" id="newIP" placeholder="Ajouter une nouvelle IP">
-                                <button id="addIP" class="admin-btn">Ajouter</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Password Policy -->
-                        <div class="security-card">
-                            <h3>Politique de mot de passe</h3>
-                            <p>Définissez les exigences de complexité pour les mots de passe.</p>
-                            <form class="admin-form">
-                                <div class="form-group">
-                                    <label>
-                                        <input type="checkbox" id="requireLength" checked disabled>
-                                        Minimum 12 caractères
-                                    </label>
-                                </div>
-                                <div class="form-group">
-                                    <label>
-                                        <input type="checkbox" id="requireUppercase" checked disabled>
-                                        Au moins une majuscule
-                                    </label>
-                                </div>
-                                <div class="form-group">
-                                    <label>
-                                        <input type="checkbox" id="requireLowercase" checked disabled>
-                                        Au moins une minuscule
-                                    </label>
-                                </div>
-                                <div class="form-group">
-                                    <label>
-                                        <input type="checkbox" id="requireNumber" checked disabled>
-                                        Au moins un chiffre
-                                    </label>
-                                </div>
-                                <div class="form-group">
-                                    <label>
-                                        <input type="checkbox" id="requireSpecial" checked disabled>
-                                        Au moins un caractère spécial
-                                    </label>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <!-- Login Attempts -->
-                        <div class="security-card">
-                            <h3>Tentatives de connexion</h3>
-                            <p>Limitez le nombre de tentatives de connexion pour prévenir les attaques par force brute.</p>
-                            <form class="admin-form">
-                                <div class="form-group">
-                                    <label for="maxAttempts">Nombre maximum de tentatives :</label>
-                                    <input type="number" id="maxAttempts" value="5" min="1" max="10">
-                                </div>
-                                <div class="form-group">
-                                    <label for="lockoutTime">Durée de verrouillage (minutes) :</label>
-                                    <input type="number" id="lockoutTime" value="15" min="5" max="60">
-                                </div>
-                                <button type="button" id="saveLoginAttempts" class="admin-btn">Enregistrer</button>
-                            </form>
-                        </div>
+                <div class="security-tabs">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="ip-whitelist">Liste blanche d'IP</button>
+                        <button class="tab-btn" data-tab="user-permissions">Permissions utilisateurs</button>
+                        <button class="tab-btn" data-tab="security-alerts">Alertes de sécurité</button>
                     </div>
-                </div>
-            </div>
-            
-            <!-- Users Tab -->
-            <div id="users" class="admin-tab">
-                <div class="admin-card">
-                    <h2>Gestion des utilisateurs</h2>
-                    <div class="user-management">
-                        <div class="user-list-container">
-                            <h3>Utilisateurs enregistrés</h3>
-                            <div id="userList" class="user-list">
-                                <!-- Les utilisateurs seront ajoutés ici dynamiquement -->
+                    <div class="tabs-content">
+                        <div id="ip-whitelist" class="tab-content active">
+                            <h3>Gestion de la liste blanche d'adresses IP</h3>
+                            <div class="whitelist-mode"></div>
+                            <div class="add-ip-form">
+                                <h4>Ajouter une adresse IP</h4>
+                                <form id="addIPForm">
+                                    <div class="form-row">
+                                        <input type="text" id="ipAddress" placeholder="Adresse IP" required>
+                                        <input type="text" id="ipDescription" placeholder="Description" required>
+                                    </div>
+                                    <div class="form-row">
+                                        <label>
+                                            <input type="checkbox" id="permanentIP"> Permanent
+                                        </label>
+                                        <button type="submit">Ajouter</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="ip-list">
+                                <p>Chargement de la liste blanche d'IP...</p>
                             </div>
                         </div>
-                        
-                        <div class="user-form-container">
-                            <h3>Ajouter un utilisateur</h3>
-                            <form id="addUserForm">
-                                <div class="form-group">
-                                    <label for="newUserEmail">Email :</label>
-                                    <input type="email" id="newUserEmail" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="newUserPassword">Mot de passe :</label>
-                                    <input type="password" id="newUserPassword" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="newUserRole">Rôle :</label>
-                                    <select id="newUserRole">
-                                        <option value="user">Utilisateur</option>
-                                        <option value="admin">Administrateur</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="admin-btn">Ajouter</button>
-                            </form>
+                        <div id="user-permissions" class="tab-content">
+                            <h3>Gestion des permissions utilisateurs</h3>
+                            <div class="roles-list">
+                                <p>Chargement des rôles...</p>
+                            </div>
+                        </div>
+                        <div id="security-alerts" class="tab-content">
+                            <h3>Alertes de sécurité</h3>
                             
-                            <div id="editUserForm" style="display: none; margin-top: 30px;">
-                                <h3>Modifier l'utilisateur</h3>
-                                <form id="updateUserForm">
-                                    <input type="hidden" id="editUserEmail">
-                                    <div class="form-group">
-                                        <label for="editUserPassword">Nouveau mot de passe :</label>
-                                        <input type="password" id="editUserPassword" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="editUserRole">Rôle :</label>
-                                        <select id="editUserRole">
-                                            <option value="user">Utilisateur</option>
-                                            <option value="admin">Administrateur</option>
+                            <!-- Panneau de statistiques des alertes -->
+                            <div class="alert-stats-panel">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="total-alerts">0</div>
+                                    <div class="stat-label">Alertes totales</div>
+                                </div>
+                                
+                                <div class="stat-card">
+                                    <div class="stat-value" id="active-alerts">0</div>
+                                    <div class="stat-label">Alertes actives</div>
+                                </div>
+                                
+                                <div class="stat-card">
+                                    <div class="stat-value" id="critical-alerts">0</div>
+                                    <div class="stat-label">Alertes critiques</div>
+                                </div>
+                                
+                                <div class="stat-card">
+                                    <div class="stat-value" id="high-alerts">0</div>
+                                    <div class="stat-label">Alertes élevées</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Panneau de filtrage des alertes -->
+                            <div class="alerts-filter-panel">
+                                <h4>Filtrer les alertes</h4>
+                                <div class="filter-controls">
+                                    <div class="filter-group">
+                                        <label for="severityFilter">Gravité:</label>
+                                        <select id="severityFilter" class="form-control">
+                                            <option value="all">Toutes</option>
+                                            <option value="critical">Critique</option>
+                                            <option value="high">Élevée</option>
+                                            <option value="medium">Moyenne</option>
+                                            <option value="low">Faible</option>
                                         </select>
                                     </div>
-                                    <div class="form-actions">
-                                        <button type="submit" class="admin-btn">Mettre à jour</button>
-                                        <button type="button" id="cancelEditBtn" class="admin-btn cancel-btn">Annuler</button>
+                                    
+                                    <div class="filter-group">
+                                        <label for="typeFilter">Type:</label>
+                                        <select id="typeFilter" class="form-control">
+                                            <option value="all">Tous</option>
+                                            <option value="failed_login_threshold">Tentatives échouées</option>
+                                            <option value="brute_force_attack">Force brute</option>
+                                            <option value="suspicious_activity">Activité suspecte</option>
+                                            <option value="multi_country_login">Connexions multi-pays</option>
+                                        </select>
                                     </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Logs Tab -->
-            <div id="logs" class="admin-tab">
-                <div class="admin-card">
-                    <h2>Connexions en temps réel</h2>
-                    <div class="realtime-logs-container">
-                        <div class="realtime-logs-header">
-                            <h3>Activité récente</h3>
-                            <div class="realtime-status">
-                                <span class="status-indicator active"></span>
-                                <span>Surveillance en direct</span>
-                            </div>
-                        </div>
-                        <div id="realtimeLogs" class="realtime-logs">
-                            <div class="no-logs-message">En attente d'activité de connexion...</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="admin-card">
-                    <h2>Historique des journaux de connexion</h2>
-                    <table class="log-table">
-                        <thead>
-                            <tr>
-                                <th>Date/Heure</th>
-                                <th>Utilisateur</th>
-                                <th>Adresse IP</th>
-                                <th>Statut</th>
-                                <th>Détails</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Les journaux seront chargés dynamiquement ici -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Events Tab -->
-            <div id="events" class="admin-tab">
-                <div class="admin-card">
-                    <h2>Gestion des événements</h2>
-                    <div class="events-management">
-                        <div class="events-calendar-container">
-                            <div id="eventsCalendar" class="events-calendar"></div>
-                        </div>
-                        
-                        <div class="events-form-container">
-                            <div id="addEventForm" class="event-form">
-                                <h3>Ajouter un événement</h3>
-                                <form id="eventForm">
-                                    <div class="form-group">
-                                        <label for="eventTitle">Titre :</label>
-                                        <input type="text" id="eventTitle" required>
+                                    
+                                    <div class="filter-group">
+                                        <label for="statusFilter">Statut:</label>
+                                        <select id="statusFilter" class="form-control">
+                                            <option value="all">Tous</option>
+                                            <option value="active">Actives</option>
+                                            <option value="resolved">Résolues</option>
+                                        </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="eventStart">Date de début :</label>
-                                        <input type="datetime-local" id="eventStart" required>
+                                    
+                                    <div class="filter-group">
+                                        <label for="dateFilter">Date:</label>
+                                        <select id="dateFilter" class="form-control">
+                                            <option value="all">Toutes</option>
+                                            <option value="today">Aujourd'hui</option>
+                                            <option value="yesterday">Hier</option>
+                                            <option value="week">Cette semaine</option>
+                                            <option value="month">Ce mois</option>
+                                        </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="eventEnd">Date de fin :</label>
-                                        <input type="datetime-local" id="eventEnd">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="eventDescription">Description :</label>
-                                        <textarea id="eventDescription" rows="4"></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="eventColor">Couleur :</label>
-                                        <input type="color" id="eventColor" value="#3788d8">
-                                    </div>
-                                    <button type="submit" class="admin-btn">Ajouter</button>
-                                </form>
+                                    
+                                    <button id="applyFilters" class="btn btn-primary">Appliquer</button>
+                                    <button id="resetFilters" class="btn btn-secondary">Réinitialiser</button>
+                                </div>
                             </div>
                             
-                            <div id="editEventForm" class="event-form" style="display: none;">
-                                <h3>Modifier l'événement</h3>
-                                <form id="updateEventForm">
-                                    <input type="hidden" id="editEventId">
-                                    <div class="form-group">
-                                        <label for="editEventTitle">Titre :</label>
-                                        <input type="text" id="editEventTitle" required>
+                            <!-- Liste des alertes -->
+                            <div class="alerts-container">
+                                <h4>Liste des alertes</h4>
+                                <div class="alerts-list" id="alerts-list">
+                                    <!-- Les alertes seront chargées dynamiquement ici -->
+                                    <div class="loading-alerts">Chargement des alertes...</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Modèle d'alerte (sera cloné par JavaScript) -->
+                            <template id="alert-template">
+                                <div class="alert-item" data-alert-id="">
+                                    <div class="alert-header">
+                                        <div class="alert-severity"></div>
+                                        <div class="alert-title"></div>
+                                        <div class="alert-time"></div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="editEventStart">Date de début :</label>
-                                        <input type="datetime-local" id="editEventStart" required>
+                                    <div class="alert-content">
+                                        <div class="alert-description"></div>
+                                        <div class="alert-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">IP:</span>
+                                                <span class="detail-value ip-address"></span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Utilisateur:</span>
+                                                <span class="detail-value username"></span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Localisation:</span>
+                                                <span class="detail-value location"></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="editEventEnd">Date de fin :</label>
-                                        <input type="datetime-local" id="editEventEnd">
+                                    <div class="alert-actions">
+                                        <button class="btn btn-sm btn-primary view-details">Détails</button>
+                                        <button class="btn btn-sm btn-success mark-resolved">Marquer comme résolu</button>
+                                        <button class="btn btn-sm btn-danger block-ip">Bloquer l'IP</button>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="editEventDescription">Description :</label>
-                                        <textarea id="editEventDescription" rows="4"></textarea>
+                                </div>
+                            </template>
+                            
+                            <!-- Détails d'une alerte (modal) -->
+                            <div id="alert-details-modal" class="modal">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Détails de l'alerte</h4>
+                                        <span class="close-modal">&times;</span>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="editEventColor">Couleur :</label>
-                                        <input type="color" id="editEventColor">
+                                    <div class="modal-body">
+                                        <div class="alert-full-details">
+                                            <!-- Les détails complets seront chargés ici -->
+                                        </div>
+                                        <div class="timeline-container">
+                                            <h5>Chronologie des événements</h5>
+                                            <div class="timeline">
+                                                <!-- La chronologie sera chargée ici -->
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-actions">
-                                        <button type="submit" class="admin-btn">Mettre à jour</button>
-                                        <button type="button" id="deleteEventBtn" class="admin-btn cancel-btn">Supprimer</button>
-                                        <button type="button" id="cancelEditEventBtn" class="admin-btn cancel-btn">Annuler</button>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary close-btn">Fermer</button>
+                                        <button class="btn btn-success resolve-btn">Marquer comme résolu</button>
+                                        <button class="btn btn-danger block-btn">Bloquer l'IP</button>
                                     </div>
-                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Settings Tab -->
-            <div id="settings" class="admin-tab">
-                <div class="admin-card">
-                    <h2>Paramètres généraux</h2>
-                    <p>Fonctionnalité à venir...</p>
-                </div>
-            </div>
+
+            
+
         </div>
     </main>
 

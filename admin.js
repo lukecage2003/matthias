@@ -7,10 +7,10 @@ document.addEventListener("DOMContentLoaded", function() {
         return;
     }
     
-    // Charger les logs de sécurité
+    // Charger les journaux de sécurité
     loadSecurityLogs();
     
-    // Initialiser la surveillance des connexions en temps réel
+    // Initialiser la surveillance des logs en temps réel
     initRealtimeLogs();
     
     // Charger les alertes de sécurité
@@ -19,22 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Initialiser la surveillance des alertes en temps réel
     initRealtimeAlerts();
     
-    // Afficher les informations de l'utilisateur connecté
-    const adminUsername = document.getElementById('adminUsername');
-    const lastLogin = document.getElementById('lastLogin');
-    
-    if (adminUsername && lastLogin) {
-        const userEmail = sessionStorage.getItem('userEmail');
-        const lastLoginTime = sessionStorage.getItem('lastLogin');
-        
-        if (userEmail) {
-            adminUsername.textContent = userEmail;
-        }
-        
-        if (lastLoginTime) {
-            lastLogin.textContent = 'Dernière connexion: ' + lastLoginTime;
-        }
-    }
+    // Les informations de l'utilisateur connecté ont été supprimées
     // Fonction pour charger et afficher les logs de sécurité
     function loadSecurityLogs() {
         const logTableBody = document.querySelector('.log-table tbody');
@@ -191,12 +176,28 @@ document.addEventListener("DOMContentLoaded", function() {
             const tabId = this.getAttribute('data-tab');
             document.getElementById(tabId).classList.add('active');
             
-            // Si on clique sur l'onglet des logs, recharger les logs
-            if (tabId === 'logs') {
+            // Recharger les logs si on est sur l'onglet de sécurité
+            if (tabId === 'security') {
                 loadSecurityLogs();
             }
         });
     });
+    
+    // Gestionnaire pour le bouton d'actualisation des logs
+    const refreshLogsBtn = document.getElementById('refreshLogs');
+    if (refreshLogsBtn) {
+        refreshLogsBtn.addEventListener('click', function() {
+            loadSecurityLogs();
+        });
+    }
+    
+    // Gestionnaire pour le filtre de type de logs
+    const logTypeFilter = document.getElementById('logTypeFilter');
+    if (logTypeFilter) {
+        logTypeFilter.addEventListener('change', function() {
+            loadSecurityLogs();
+        });
+    }
 
     // Gestion du bouton de déconnexion
     const logoutBtn = document.getElementById('logoutBtn');

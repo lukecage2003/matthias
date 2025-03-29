@@ -25,6 +25,12 @@ const suspiciousActivityConfig = {
             timeWindowHours: 48,
             workHoursStart: 8, // 8h00
             workHoursEnd: 18   // 18h00
+        },
+        
+        // Détection des connexions depuis des adresses IP inconnues
+        unknownIPLogins: {
+            enabled: true,
+            timeWindowHours: 24
         }
     },
     
@@ -94,6 +100,46 @@ const suspiciousActivityConfig = {
                     count: oddHourLogins.length,
                     severity: suspiciousActivityConfig.severityLevels.LOW,
                     details: `${oddHourLogins.length} connexions en dehors des heures de bureau`
+                };
+            }
+        },
+        {
+            name: 'suspicious_ip_login',
+            description: 'Connexions depuis des adresses IP inconnues',
+            check: function(logs, userEmail) {
+                // Vérifier si la fonctionnalité est activée
+                if (!suspiciousActivityConfig.thresholds.unknownIPLogins.enabled) {
+                    return { detected: false };
+                }
+                
+                // Obtenir tous les logs de l'utilisateur
+                const userLogs = logs.filter(log => log.email === userEmail);
+                
+                // Obtenir les logs récents
+                const timeWindowHours = suspiciousActivityConfig.thresholds.unknownIPLogins.timeWindowHours;
+                const recentLogs = filterRecentLogs(logs, timeWindowHours);
+                
+                // Obtenir les adresses IP connues (historiques) de l'utilisateur
+                const knownIPs = new Set();
+                userLogs.forEach(log => {
+                    if (log.status === window.securityLogs.LOG_TYPES.SUCCESS) {
+                        knownIPs.add(log.ipAddress);
+                    }
+                });
+                
+                // Vérifier les connexions récentes depuis des IP inconnues
+                const suspiciousLogins = recentLogs.filter(log => {
+                    return log.email === userEmail && 
+                           log.status === window.securityLogs.LOG_TYPES.SUCCESS && 
+                           !knownIPs.has(log.ipAddress);
+                });
+                
+                return {
+                    detected: suspiciousLogins.length > 0,
+                    count: suspiciousLogins.length,
+                    ipAddresses: suspiciousLogins.map(log => log.ipAddress),
+                    severity: suspiciousActivityConfig.severityLevels.HIGH,
+                    details: `${suspiciousLogins.length} connexion(s) depuis des adresses IP inconnues détectée(s)`
                 };
             }
         },

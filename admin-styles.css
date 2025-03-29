@@ -7,15 +7,17 @@
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    animation: fadeIn 1s ease-in;
 }
 
 .admin-header {
-    background: linear-gradient(to right, #2c3e50, #4a6491);
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
     color: white;
     padding: 20px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .admin-header h1 {
@@ -51,7 +53,9 @@
 .admin-nav a:hover,
 .admin-nav a.active {
     background-color: #f0f0f0;
-    color: #2c3e50;
+    color: #ca0d95;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
 }
 
 .admin-content {
@@ -64,11 +68,17 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     padding: 20px;
     margin-bottom: 20px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.admin-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
 .admin-card h2 {
     margin-top: 0;
-    color: #2c3e50;
+    color: #ca0d95;
     font-size: 18px;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
@@ -88,6 +98,7 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     padding: 20px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 4px solid #ca0d95;
 }
 
 .security-card:hover {
@@ -97,7 +108,7 @@
 
 .security-card h3 {
     margin-top: 0;
-    color: #2c3e50;
+    color: #ca0d95;
 }
 
 /* Events Management */
@@ -135,7 +146,7 @@
 
 .event-form h3 {
     margin-top: 0;
-    color: #2c3e50;
+    color: #ca0d95;
     font-size: 18px;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
@@ -161,6 +172,15 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-form input[type="text"]:focus,
+.event-form input[type="datetime-local"]:focus,
+.event-form textarea:focus {
+    border-color: #ca0d95;
+    box-shadow: 0 0 0 3px rgba(202, 13, 149, 0.1);
+    outline: none;
 }
 
 .event-form input[type="color"] {
@@ -176,6 +196,29 @@
     margin-top: 20px;
 }
 
+.admin-btn {
+    padding: 12px 25px;
+    background-color: #ca0d95;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 5px;
+}
+
+.admin-btn:hover {
+    background-color: #FE7F88;
+    transform: translateY(-2px);
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+}
+
+.cancel-btn:hover {
+    background-color: #5a6268;
+}
+
 /* FullCalendar Customization */
 .fc-event {
     cursor: pointer;
@@ -185,17 +228,19 @@
 
 .fc-toolbar-title {
     font-size: 18px !important;
-    color: #2c3e50;
+    color: #ca0d95;
 }
 
 .fc-button-primary {
-    background-color: #2c3e50 !important;
-    border-color: #2c3e50 !important;
+    background-color: #ca0d95 !important;
+    border-color: #ca0d95 !important;
+    transition: all 0.3s ease;
 }
 
 .fc-button-primary:hover {
-    background-color: #4a6491 !important;
-    border-color: #4a6491 !important;
+    background-color: #FE7F88 !important;
+    border-color: #FE7F88 !important;
+    transform: translateY(-2px);
 }
     font-size: 16px;
 }
@@ -213,14 +258,20 @@
     border: 1px solid #eee;
     border-radius: 5px;
     margin-bottom: 15px;
+    background-color: #f9f9f9;
 }
 
 .ip-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
+    padding: 10px 15px;
     border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+}
+
+.ip-item:hover {
+    background-color: #f0f0f0;
 }
 
 .ip-item:last-child {
@@ -233,6 +284,14 @@
     color: #dc3545;
     cursor: pointer;
     font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.ip-actions button:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #bd2130;
 }
 
 /* Login Logs */
