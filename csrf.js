@@ -38,8 +38,8 @@ function setSecureCookie(name, value, options = {}) {
     // Toujours activer l'option secure pour les cookies
     cookieString += '; secure';
     
-    // Toujours activer l'option httpOnly pour les cookies
-    cookieString += '; httpOnly';
+    // Note: httpOnly ne peut pas être défini côté client, il doit être défini côté serveur
+    // L'attribut est conservé dans la configuration pour référence
     
     // Définir sameSite à 'strict' par défaut pour une meilleure protection
     const sameSiteValue = mergedOptions.sameSite || 'strict';

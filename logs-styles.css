@@ -1,0 +1,466 @@
+/* Styles pour l'affichage des logs de sécurité */
+
+/* Conteneur principal des logs */
+.logs-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+/* En-tête du conteneur de logs */
+.logs-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logs-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+}
+
+/* Filtres pour les logs */
+.logs-filters {
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 0;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.filter-buttons button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.apply-filters {
+    background-color: #ca0d95;
+    color: white;
+}
+
+.apply-filters:hover {
+    background-color: #a80a7a;
+}
+
+.reset-filters {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    color: #555;
+}
+
+.reset-filters:hover {
+    background-color: #e9ecef;
+}
+
+/* Tableau des logs */
+.logs-table-container {
+    overflow-x: auto;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Styles pour mettre en évidence l'heure, l'adresse IP et l'adresse email */
+.logs-table td:nth-child(1) strong,
+.logs-table td:nth-child(2) strong,
+.logs-table td:nth-child(3) strong {
+    font-weight: bold;
+    color: #0056b3;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.logs-table th,
+.logs-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.logs-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #555;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.logs-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Styles pour les différents types de logs */
+.log-row.success {
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+.log-row.failure {
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.log-row.suspicious {
+    background-color: rgba(255, 193, 7, 0.05);
+}
+
+.log-row.warning {
+    background-color: rgba(255, 152, 0, 0.05);
+}
+
+.log-row.critical {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.log-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.log-status.success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.log-status.failure {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.log-status.suspicious {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.log-status.warning {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #fd7e14;
+}
+
+.log-status.info {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.log-status.critical {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    font-weight: 700;
+}
+
+/* Pied de page des logs */
+.logs-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logs-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.logs-actions select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.logs-actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.export-logs {
+    background-color: #6c757d;
+    color: white;
+}
+
+.export-logs:hover {
+    background-color: #5a6268;
+}
+
+.clear-logs {
+    background-color: #dc3545;
+    color: white;
+}
+
+.clear-logs:hover {
+    background-color: #c82333;
+}
+
+.logs-pagination {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.logs-pagination button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logs-pagination button:hover {
+    background-color: #f8f9fa;
+}
+
+.logs-pagination button.active {
+    background-color: #ca0d95;
+    color: white;
+    border-color: #ca0d95;
+}
+
+/* Message quand aucun log n'est disponible */
+.no-data {
+    text-align: center;
+    padding: 30px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Styles pour les alertes de sécurité */
+.security-alerts {
+    margin-bottom: 20px;
+}
+
+.alert-item {
+    background-color: #fff;
+    border-left: 4px solid #ffc107;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+    padding: 15px;
+    transition: transform 0.2s ease;
+}
+
+.alert-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alert-item.critical {
+    border-left-color: #dc3545;
+}
+
+.alert-item.warning {
+    border-left-color: #fd7e14;
+}
+
+.alert-item.info {
+    border-left-color: #17a2b8;
+}
+
+.alert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.alert-title {
+    font-weight: 600;
+    margin: 0;
+    color: #333;
+}
+
+.alert-timestamp {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.alert-description {
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.alert-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.alert-severity {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.alert-severity.critical {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.alert-severity.warning {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #fd7e14;
+}
+
+.alert-severity.suspicious {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.alert-actions button {
+    background: none;
+    border: none;
+    color: #ca0d95;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 0;
+    margin-left: 10px;
+}
+
+.alert-actions button:hover {
+    text-decoration: underline;
+}
+
+/* Styles pour les statistiques de sécurité */
+.security-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 10px 0;
+    color: #ca0d95;
+}
+
+.stat-label {
+    color: #555;
+    font-size: 14px;
+    margin: 0;
+}
+
+.stat-trend {
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.trend-up {
+    color: #dc3545;
+}
+
+.trend-down {
+    color: #28a745;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .logs-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-buttons {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+    
+    .logs-actions {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .logs-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .security-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .security-stats {
+        grid-template-columns: 1fr;
+    }
+}

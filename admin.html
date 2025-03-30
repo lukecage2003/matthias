@@ -9,23 +9,21 @@
     <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="security-dashboard.css">
     <link rel="stylesheet" href="alert-styles.css">
+    <link rel="stylesheet" href="logs-styles.css">
     <script defer src="script.js"></script>
     <script defer src="auth.js"></script>
     <script defer src="twofa.js"></script>
     <script defer src="csrf.js"></script>
-    <script defer src="security-logs.js"></script>
-    <script defer src="advanced-security-logs.js"></script>
     <script defer src="ip-whitelist.js"></script>
-    <script defer src="user-permissions.js"></script>
-    <script defer src="security-alert-system.js"></script>
-    <script defer src="security-alert-system-ui.js"></script>
+    <!-- Script de permissions utilisateurs supprimé -->
     <script defer src="security-dashboard.js"></script>
     <script defer src="security-config.js"></script>
     <script defer src="security-integration.js"></script>
     <script defer src="security-monitor.js"></script>
+    <script defer src="security-logs.js"></script>
+    <script defer src="advanced-security-logs.js"></script>
     <script defer src="security-system-init.js"></script>
     <script defer src="security-admin.js"></script>
-    <script defer src="security-alerts-handler.js"></script>
     <script defer src="admin.js"></script>
     
 
@@ -63,8 +61,7 @@
                 <div class="security-tabs">
                     <div class="tabs-header">
                         <button class="tab-btn active" data-tab="ip-whitelist">Liste blanche d'IP</button>
-                        <button class="tab-btn" data-tab="user-permissions">Permissions utilisateurs</button>
-                        <button class="tab-btn" data-tab="security-alerts">Alertes de sécurité</button>
+                        <button class="tab-btn" data-tab="security-logs">Logs de sécurité</button>
                     </div>
                     <div class="tabs-content">
                         <div id="ip-whitelist" class="tab-content active">
@@ -83,159 +80,121 @@
                                         </label>
                                         <button type="submit">Ajouter</button>
                                     </div>
+                                    <input type="hidden" name="csrf_token">
                                 </form>
                             </div>
                             <div class="ip-list">
                                 <p>Chargement de la liste blanche d'IP...</p>
                             </div>
                         </div>
-                        <div id="user-permissions" class="tab-content">
-                            <h3>Gestion des permissions utilisateurs</h3>
-                            <div class="roles-list">
-                                <p>Chargement des rôles...</p>
-                            </div>
-                        </div>
-                        <div id="security-alerts" class="tab-content">
-                            <h3>Alertes de sécurité</h3>
+                        
+                        <div id="security-logs" class="tab-content">
+                            <h3>Journaux de sécurité</h3>
                             
-                            <!-- Panneau de statistiques des alertes -->
-                            <div class="alert-stats-panel">
+                            <!-- Statistiques de sécurité -->
+                            <div class="security-stats">
                                 <div class="stat-card">
-                                    <div class="stat-value" id="total-alerts">0</div>
-                                    <div class="stat-label">Alertes totales</div>
+                                    <p class="stat-label">Connexions réussies</p>
+                                    <div class="stat-value" id="successLogins">0</div>
                                 </div>
-                                
                                 <div class="stat-card">
-                                    <div class="stat-value" id="active-alerts">0</div>
-                                    <div class="stat-label">Alertes actives</div>
+                                    <p class="stat-label">Échecs de connexion</p>
+                                    <div class="stat-value" id="failedLogins">0</div>
                                 </div>
-                                
                                 <div class="stat-card">
-                                    <div class="stat-value" id="critical-alerts">0</div>
-                                    <div class="stat-label">Alertes critiques</div>
+                                    <p class="stat-label">Activités suspectes</p>
+                                    <div class="stat-value" id="suspiciousActivities">0</div>
                                 </div>
-                                
                                 <div class="stat-card">
-                                    <div class="stat-value" id="high-alerts">0</div>
-                                    <div class="stat-label">Alertes élevées</div>
+                                    <p class="stat-label">Alertes actives</p>
+                                    <div class="stat-value" id="activeAlerts">0</div>
                                 </div>
                             </div>
                             
-                            <!-- Panneau de filtrage des alertes -->
-                            <div class="alerts-filter-panel">
-                                <h4>Filtrer les alertes</h4>
-                                <div class="filter-controls">
+                            <!-- Alertes de sécurité -->
+                            <div class="logs-container">
+                                <div class="logs-header">
+                                    <h3>Alertes de sécurité</h3>
+                                </div>
+                                <div class="security-alerts" id="securityAlerts">
+                                    <p class="no-data">Aucune alerte active</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Logs de connexion -->
+                            <div class="logs-container">
+                                <div class="logs-header">
+                                    <h3>Journaux de connexion</h3>
+                                </div>
+                                
+                                <!-- Filtres -->
+                                <div class="logs-filters">
                                     <div class="filter-group">
-                                        <label for="severityFilter">Gravité:</label>
-                                        <select id="severityFilter" class="form-control">
-                                            <option value="all">Toutes</option>
+                                        <label for="logTypeFilter">Type:</label>
+                                        <select id="logTypeFilter">
+                                            <option value="all">Tous</option>
+                                            <option value="success">Réussite</option>
+                                            <option value="failure">Échec</option>
+                                            <option value="suspicious">Suspect</option>
+                                            <option value="warning">Avertissement</option>
                                             <option value="critical">Critique</option>
-                                            <option value="high">Élevée</option>
-                                            <option value="medium">Moyenne</option>
-                                            <option value="low">Faible</option>
+                                            <option value="info">Information</option>
                                         </select>
                                     </div>
-                                    
                                     <div class="filter-group">
-                                        <label for="typeFilter">Type:</label>
-                                        <select id="typeFilter" class="form-control">
-                                            <option value="all">Tous</option>
-                                            <option value="failed_login_threshold">Tentatives échouées</option>
-                                            <option value="brute_force_attack">Force brute</option>
-                                            <option value="suspicious_activity">Activité suspecte</option>
-                                            <option value="multi_country_login">Connexions multi-pays</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="filter-group">
-                                        <label for="statusFilter">Statut:</label>
-                                        <select id="statusFilter" class="form-control">
-                                            <option value="all">Tous</option>
-                                            <option value="active">Actives</option>
-                                            <option value="resolved">Résolues</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="filter-group">
-                                        <label for="dateFilter">Date:</label>
-                                        <select id="dateFilter" class="form-control">
-                                            <option value="all">Toutes</option>
+                                        <label for="logDateFilter">Période:</label>
+                                        <select id="logDateFilter">
+                                            <option value="all">Tout</option>
                                             <option value="today">Aujourd'hui</option>
                                             <option value="yesterday">Hier</option>
-                                            <option value="week">Cette semaine</option>
-                                            <option value="month">Ce mois</option>
+                                            <option value="week">7 derniers jours</option>
+                                            <option value="month">30 derniers jours</option>
                                         </select>
                                     </div>
-                                    
-                                    <button id="applyFilters" class="btn btn-primary">Appliquer</button>
-                                    <button id="resetFilters" class="btn btn-secondary">Réinitialiser</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Liste des alertes -->
-                            <div class="alerts-container">
-                                <h4>Liste des alertes</h4>
-                                <div class="alerts-list" id="alerts-list">
-                                    <!-- Les alertes seront chargées dynamiquement ici -->
-                                    <div class="loading-alerts">Chargement des alertes...</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Modèle d'alerte (sera cloné par JavaScript) -->
-                            <template id="alert-template">
-                                <div class="alert-item" data-alert-id="">
-                                    <div class="alert-header">
-                                        <div class="alert-severity"></div>
-                                        <div class="alert-title"></div>
-                                        <div class="alert-time"></div>
+                                    <div class="filter-group">
+                                        <label for="logUserFilter">Utilisateur:</label>
+                                        <input type="text" id="logUserFilter" placeholder="Email utilisateur">
                                     </div>
-                                    <div class="alert-content">
-                                        <div class="alert-description"></div>
-                                        <div class="alert-details">
-                                            <div class="detail-item">
-                                                <span class="detail-label">IP:</span>
-                                                <span class="detail-value ip-address"></span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <span class="detail-label">Utilisateur:</span>
-                                                <span class="detail-value username"></span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <span class="detail-label">Localisation:</span>
-                                                <span class="detail-value location"></span>
-                                            </div>
-                                        </div>
+                                    <div class="filter-group">
+                                        <label for="logIPFilter">Adresse IP:</label>
+                                        <input type="text" id="logIPFilter" placeholder="Adresse IP">
                                     </div>
-                                    <div class="alert-actions">
-                                        <button class="btn btn-sm btn-primary view-details">Détails</button>
-                                        <button class="btn btn-sm btn-success mark-resolved">Marquer comme résolu</button>
-                                        <button class="btn btn-sm btn-danger block-ip">Bloquer l'IP</button>
+                                    <div class="filter-buttons">
+                                        <button id="applyLogFilters" class="apply-filters">Appliquer</button>
+                                        <button id="resetLogFilters" class="reset-filters">Réinitialiser</button>
                                     </div>
                                 </div>
-                            </template>
-                            
-                            <!-- Détails d'une alerte (modal) -->
-                            <div id="alert-details-modal" class="modal">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title">Détails de l'alerte</h4>
-                                        <span class="close-modal">&times;</span>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="alert-full-details">
-                                            <!-- Les détails complets seront chargés ici -->
-                                        </div>
-                                        <div class="timeline-container">
-                                            <h5>Chronologie des événements</h5>
-                                            <div class="timeline">
-                                                <!-- La chronologie sera chargée ici -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button class="btn btn-secondary close-btn">Fermer</button>
-                                        <button class="btn btn-success resolve-btn">Marquer comme résolu</button>
-                                        <button class="btn btn-danger block-btn">Bloquer l'IP</button>
+                                
+                                <!-- Tableau des logs -->
+                                <div class="logs-table-container">
+                                    <table class="logs-table" id="securityLogsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Date/Heure</th>
+                                                <th>Utilisateur</th>
+                                                <th>Adresse IP</th>
+                                                <th>Statut</th>
+                                                <th>Détails</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="securityLogsTableBody">
+                                            <tr>
+                                                <td colspan="5" class="no-data">Chargement des logs...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Actions sur les logs -->
+                                <div class="logs-footer">
+                                    <div class="logs-actions">
+                                        <select id="exportFormat">
+                                            <option value="json">JSON</option>
+                                            <option value="csv">CSV</option>
+                                            <option value="siem">SIEM</option>
+                                        </select>
+                                        <button id="exportLogs" class="export-logs">Exporter</button>
+                                        <button id="clearLogs" class="clear-logs">Effacer tous les logs</button>
                                     </div>
                                 </div>
                             </div>

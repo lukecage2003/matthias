@@ -34,6 +34,11 @@ document.addEventListener('DOMContentLoaded', function() {
             window.csrf.protectForms();
         }
         
+        // Initialiser le module de journalisation avancée
+        if (window.securityLogs && window.securityLogs.init) {
+            window.securityLogs.init();
+        }
+        
         // Ajouter un gestionnaire d'événements pour les tentatives de connexion
         addLoginEventHandler();
     }
@@ -165,15 +170,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function initCSRFProtection() {
         if (!window.csrf) return;
         
+        // Vérifier si la configuration CSRF existe
+        if (!window.securityConfig || !window.securityConfig.csrfProtection) {
+            console.warn('Configuration CSRF non trouvée, utilisation des paramètres par défaut');
+            return;
+        }
+        
         // Appliquer la configuration centralisée
         const csrfConfig = window.securityConfig.csrfProtection;
         
         // Mettre à jour la configuration des cookies
-        window.cookieConfig = csrfConfig.cookies;
+        if (csrfConfig.cookies) {
+            window.cookieConfig = csrfConfig.cookies;
+        }
         
         // Ajouter une fonction pour protéger tous les formulaires
         window.csrf.protectForms = function() {
-            if (!csrfConfig.enabled) return;
+            // Vérifier si la protection CSRF est activée
+            if (csrfConfig && typeof csrfConfig.enabled !== 'undefined' && !csrfConfig.enabled) return;
             
             const forms = document.querySelectorAll('form');
             forms.forEach(form => {
