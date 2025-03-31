@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
     <script defer src="cookie-consent.js"></script>
+    <script defer src="database.js"></script>
+    <script defer src="sql-protection.js"></script>
+    <script defer src="xss-protection.js"></script>
+    <script defer src="messages.js"></script>
 
 </head>
 <body>
@@ -142,7 +146,7 @@
     <div class="modal-content">
         <a href="#!" class="close-btn">&times;</a>
         <h2>Contactez-nous</h2>
-        <form id="contactForm" method="post">
+        <form id="contactForm" method="post" action="javascript:void(0);">
             <label for="name">Nom :</label>
             <input type="text" id="name" name="name" required>
 
