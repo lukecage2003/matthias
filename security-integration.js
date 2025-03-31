@@ -1,10 +1,29 @@
 // Module d'intégration des systèmes de sécurité pour Tech Shield
+// Version améliorée avec chiffrement AES-256, requêtes préparées et détection d'attaques
+
+/**
+ * Configuration globale du système de sécurité
+ */
+const securitySystemConfig = {
+    // Version du système
+    version: '2.0.0',
+    
+    // Activer la journalisation détaillée
+    verboseLogging: true,
+    
+    // Modules à activer
+    modules: {
+        securePermissions: true,
+        secureEncryption: true,
+        preparedQueries: true,
+        attackDetection: true
+    }
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     // Vérifier si la configuration de sécurité centralisée est disponible
     if (!window.securityConfig) {
         console.warn('Configuration de sécurité non trouvée, utilisation des paramètres par défaut');
-        return;
     }
     
     // Initialiser tous les modules de sécurité
@@ -13,21 +32,18 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Initialise tous les modules de sécurité avec la configuration centralisée
      */
-    function initSecurityModules() {
-        // Initialiser la liste blanche d'IP
+    async function initSecurityModules() {
+        console.log('Initialisation du système de sécurité Tech Shield v' + securitySystemConfig.version);
+        
+        // Initialiser les modules de base
         initIPWhitelist();
-        
-        // Initialiser les permissions utilisateurs
         initUserPermissions();
-        
-        // Initialiser les journaux de sécurité
         initSecurityLogs();
-        
-        // Initialiser l'authentification à deux facteurs
         initTwoFactorAuth();
-        
-        // Initialiser la protection CSRF
         initCSRFProtection();
+        
+        // Initialiser les nouveaux modules de sécurité avancés
+        await initAdvancedSecurityModules();
         
         // Protéger les formulaires contre les attaques CSRF
         if (window.csrf && window.csrf.protectForms) {
@@ -41,6 +57,83 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Ajouter un gestionnaire d'événements pour les tentatives de connexion
         addLoginEventHandler();
+        
+        console.log('Système de sécurité initialisé avec succès');
+    }
+    
+    /**
+     * Initialise les modules de sécurité avancés
+     */
+    async function initAdvancedSecurityModules() {
+        try {
+            // 1. Initialiser le module de permissions sécurisées basé sur le principe du moindre privilège
+            if (securitySystemConfig.modules.securePermissions && window.securePermissions) {
+                console.log('Initialisation du module de permissions sécurisées...');
+                const permConfig = window.securityConfig?.userPermissions || {};
+                window.securePermissions.init(permConfig);
+                logModuleInit('Permissions sécurisées', true);
+            }
+            
+            // 2. Initialiser le module de chiffrement AES-256
+            if (securitySystemConfig.modules.secureEncryption && window.secureEncryption) {
+                console.log('Initialisation du module de chiffrement AES-256...');
+                await window.secureEncryption.init();
+                logModuleInit('Chiffrement AES-256', true);
+            }
+            
+            // 3. Initialiser le module de requêtes préparées
+            if (securitySystemConfig.modules.preparedQueries && window.preparedQueries) {
+                console.log('Initialisation du module de requêtes préparées...');
+                window.preparedQueries.init();
+                logModuleInit('Requêtes préparées', true);
+            }
+            
+            // 4. Initialiser le module de détection d'attaques
+            if (securitySystemConfig.modules.attackDetection && window.attackDetection) {
+                console.log('Initialisation du module de détection d\'attaques...');
+                window.attackDetection.init();
+                logModuleInit('Détection d\'attaques', true);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Erreur lors de l\'initialisation des modules de sécurité avancés:', error);
+            
+            // Journaliser l'erreur si le module de logs est disponible
+            if (window.securityLogs) {
+                window.securityLogs.addLog({
+                    status: window.securityLogs.LOG_TYPES.ERROR,
+                    details: 'Erreur lors de l\'initialisation des modules de sécurité avancés: ' + error.message,
+                    source: 'security-integration'
+                });
+            }
+            
+            return false;
+        }
+    }
+    
+    /**
+     * Journalise l'initialisation d'un module
+     * @param {string} moduleName - Nom du module
+     * @param {boolean} success - Succès de l'initialisation
+     */
+    function logModuleInit(moduleName, success) {
+        if (success) {
+            console.log(`Module ${moduleName} initialisé avec succès`);
+        } else {
+            console.warn(`Échec de l'initialisation du module ${moduleName}`);
+        }
+        
+        // Journaliser l'initialisation si le module de logs est disponible
+        if (window.securityLogs && securitySystemConfig.verboseLogging) {
+            window.securityLogs.addLog({
+                status: success ? window.securityLogs.LOG_TYPES.INFO : window.securityLogs.LOG_TYPES.WARNING,
+                details: success ? 
+                    `Module ${moduleName} initialisé avec succès` : 
+                    `Échec de l'initialisation du module ${moduleName}`,
+                source: 'security-integration'
+            });
+        }
     }
     
     /**
@@ -179,21 +272,54 @@ document.addEventListener('DOMContentLoaded', function() {
         // Appliquer la configuration centralisée
         const csrfConfig = window.securityConfig.csrfProtection;
         
-        // Mettre à jour la configuration des cookies
+        // Mettre à jour la configuration des cookies avec des paramètres de sécurité renforcés
         if (csrfConfig.cookies) {
-            window.cookieConfig = csrfConfig.cookies;
+            // S'assurer que les options de sécurité sont activées
+            const secureOptions = {
+                secure: true,       // Toujours activer l'option secure
+                httpOnly: true,     // Toujours activer l'option httpOnly (sera appliquée côté serveur)
+                sameSite: 'strict', // Toujours utiliser sameSite=strict pour une protection maximale
+                maxAge: csrfConfig.cookies.maxAge || 3600 // Durée de vie par défaut: 1 heure
+            };
+            
+            // Fusionner avec la configuration existante en donnant priorité aux options sécurisées
+            Object.assign(window.cookieConfig || {}, csrfConfig.cookies, secureOptions);
         }
         
-        // Ajouter une fonction pour protéger tous les formulaires
-        window.csrf.protectForms = function() {
+        // Ne pas redéfinir la fonction protectForms pour éviter de perdre la gestion des événements
+        // Appeler directement la fonction originale si elle existe
+        if (window.csrf.protectForms) {
             // Vérifier si la protection CSRF est activée
-            if (csrfConfig && typeof csrfConfig.enabled !== 'undefined' && !csrfConfig.enabled) return;
-            
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                window.csrf.addCSRFTokenToForm(form);
+            if (!(csrfConfig && typeof csrfConfig.enabled !== 'undefined' && !csrfConfig.enabled)) {
+                // Appeler la fonction originale qui gère correctement les événements de soumission
+                window.csrf.protectForms();
+                console.log('Protection CSRF activée pour tous les formulaires');
+            }
+        }
+        
+        // Ajouter un observateur de mutation pour protéger les formulaires ajoutés dynamiquement
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                    // Vérifier si des formulaires ont été ajoutés
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.tagName === 'FORM') {
+                            window.csrf.addCSRFTokenToForm(node);
+                        }
+                        if (node.querySelectorAll) {
+                            const forms = node.querySelectorAll('form');
+                            forms.forEach(form => window.csrf.addCSRFTokenToForm(form));
+                        }
+                    });
+                }
             });
-        };
+        });
+        
+        // Observer tout le document pour les changements
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     }
     
     /**

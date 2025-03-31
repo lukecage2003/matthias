@@ -1,0 +1,25 @@
+{
+  "name": "tech-shield",
+  "version": "1.0.0",
+  "description": "Plateforme sécurisée Tech Shield pour le dépôt de CV et le recrutement",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "audit": "npm audit"
+  },
+  "dependencies": {
+    "fullcalendar": "^6.1.10"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/username/tech-shield.git"
+  },
+  "keywords": [
+    "sécurité",
+    "recrutement",
+    "cv"
+  ],
+  "author": "Tech Shield Team",
+  "license": "MIT"
+}

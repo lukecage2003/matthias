@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tech Shield - Interface d'administration des messages">
+    <title>Tech Shield - Administration des Messages</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="admin-messages.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script defer src="script.js"></script>
+    <script defer src="auth.js"></script>
+    <script defer src="security-utils.js"></script>
+    <script defer src="xss-protection.js"></script>
+    <script defer src="sql-protection.js"></script>
+    <script defer src="csrf-protection.js"></script>
+    <script defer src="database.js"></script>
+    <script defer src="security-logs.js"></script>
+    <script defer src="admin-messages.js"></script>
+</head>
+<body>
+    <header class="fixed-header">
+        <div class="burger-menu" aria-label="Menu">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+        <div class="logo" onclick="scrollToTop()" aria-label="Retour en haut">
+            <img src="logo.png" alt="Tech Shield Logo">
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="admin.html">Administration</a></li>
+                <li><a href="admin-messages.html" class="active">Messages</a></li>
+                <li><a href="#" id="logoutBtn">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-content">
+            <div class="messages-container">
+                <div class="messages-header">
+                    <h3>Gestion des Messages</h3>
+                    <div class="messages-actions">
+                        <button id="refreshMessages" class="primary">
+                            <i class="fas fa-sync-alt"></i> Actualiser
+                        </button>
+                        <button id="exportMessages">
+                            <i class="fas fa-file-export"></i> Exporter
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Statistiques des messages -->
+                <div class="messages-stats">
+                    <div class="stat-card">
+                        <p class="stat-label">Total des messages</p>
+                        <div class="stat-value" id="totalMessages">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Messages non lus</p>
+                        <div class="stat-value" id="unreadMessages">0</div>
+                    </div>
+                </div>
+                
+                <!-- Filtres des messages -->
+                <div class="messages-filters">
+                    <form id="messageFilterForm" class="filter-form">
+                        <div class="filter-group">
+                            <label for="searchText">Recherche :</label>
+                            <input type="text" id="searchText" placeholder="Rechercher dans les messages...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="readFilter">Statut :</label>
+                            <select id="readFilter">
+                                <option value="">Tous</option>
+                                <option value="false">Non lus</option>
+                                <option value="true">Lus</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="startDate">Date de début :</label>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div class="filter-group">
+                            <label for="endDate">Date de fin :</label>
+                            <input type="date" id="endDate">
+                        </div>
+                        <div class="filter-buttons">
+                            <button type="submit" class="apply-filters">Appliquer</button>
+                            <button type="button" id="resetFilters" class="reset-filters">Réinitialiser</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Liste des messages -->
+                <div class="messages-list" id="messagesList">
+                    <div class="loading-indicator">Chargement des messages...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; Tech Shield. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

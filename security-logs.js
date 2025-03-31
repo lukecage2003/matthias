@@ -728,9 +728,15 @@ function generateUniqueId() {
  * @returns {string} Adresse IP du client
  */
 function getClientIP() {
-    // Dans un environnement réel, cette fonction serait implémentée côté serveur
-    // Pour le moment, on retourne une valeur factice
-    return '127.0.0.1';
+    // Utiliser la fonction getClientIP du module ip-whitelist si disponible
+    if (window.ipWhitelist && typeof window.ipWhitelist.getClientIP === 'function') {
+        return window.ipWhitelist.getClientIP();
+    }
+    
+    // Sinon, essayer de récupérer l'IP à partir des en-têtes HTTP (simulation)
+    // Dans un environnement réel, cette information serait fournie par le serveur
+    // via des variables d'environnement ou des en-têtes HTTP spécifiques
+    return '192.168.1.1'; // IP simulée pour la démonstration
 }
 
 /**

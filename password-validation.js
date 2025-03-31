@@ -71,6 +71,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const authResult = window.auth && window.auth.authenticate(email, password);
             
             if (authResult && authResult.success) {
+                // Régénérer l'ID de session pour prévenir la fixation de session
+                if (window.csrf && window.csrf.regenerateSessionId) {
+                    console.log('Régénération de l\'ID de session après connexion réussie');
+                    window.csrf.regenerateSessionId();
+                }
+                
                 // Afficher le bouton d'administration si l'utilisateur est admin
                 const adminButtonContainer = document.getElementById('adminButtonContainer');
                 if (window.auth.isAdmin() && adminButtonContainer) {

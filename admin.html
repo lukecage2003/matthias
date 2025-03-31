@@ -14,6 +14,13 @@
     <script defer src="auth.js"></script>
     <script defer src="twofa.js"></script>
     <script defer src="csrf.js"></script>
+    <script defer src="security-utils.js"></script>
+    <script defer src="xss-protection.js"></script>
+    <script defer src="sql-protection.js"></script>
+    <script defer src="csrf-protection.js"></script>
+    <script defer src="prepared-queries-enhanced.js"></script>
+    <script defer src="events-security.js"></script>
+    <script defer src="security-fixes.js"></script>
     <script defer src="ip-whitelist.js"></script>
     <!-- Script de permissions utilisateurs supprimé -->
     <script defer src="security-dashboard.js"></script>
@@ -24,7 +31,21 @@
     <script defer src="advanced-security-logs.js"></script>
     <script defer src="security-system-init.js"></script>
     <script defer src="security-admin.js"></script>
+    <script defer src="events.js"></script>
+    <script defer src="admin-events.js"></script>
     <script defer src="admin.js"></script>
+    <script defer src="fullcalendar-update.js"></script>
+    <script defer src="security-audit-config.js"></script>
+    
+    <!-- Modules de sécurité pour les tests et correctifs -->
+    <script defer src="security-vulnerability-fixes.js"></script>
+    <script defer src="security-scanner.js"></script>
+    <script defer src="security-test-init.js"></script>
+    
+    <!-- FullCalendar - Bibliothèque pour l'affichage du calendrier (mise à jour vers 6.1.10) -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/fr.js"></script>
     
 
 </head>
@@ -42,6 +63,7 @@
             <ul class="nav-links">
                 <li><a href="index.html">Accueil</a></li>
                 <li><a href="admin.html" class="active">Administration</a></li>
+                <li><a href="admin-messages.html">Messages</a></li>
                 <li><a href="#" id="logoutBtn">Déconnexion</a></li>
             </ul>
         </nav>
@@ -52,6 +74,7 @@
         <nav class="admin-nav">
             <ul>
                 <li><a href="#" class="active" data-tab="security">Sécurité</a></li>
+                <li><a href="#" data-tab="events">Événements</a></li>
             </ul>
         </nav>
 
@@ -203,8 +226,81 @@
                 </div>
             </div>
             
-
-            
+            <!-- Events Tab -->
+            <div id="events" class="admin-tab">
+                <h2>Gestion des Événements</h2>
+                <div class="events-container">
+                    <div class="events-calendar-container">
+                        <div id="eventsCalendar"></div>
+                    </div>
+                    
+                    <div class="events-forms-container">
+                        <!-- Formulaire d'ajout d'événement -->
+                        <div id="addEventForm" class="event-form-container">
+                            <h3>Ajouter un événement</h3>
+                            <form id="eventForm">
+                                <div class="form-group">
+                                    <label for="eventTitle">Titre</label>
+                                    <input type="text" id="eventTitle" name="eventTitle" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eventStart">Date de début</label>
+                                    <input type="datetime-local" id="eventStart" name="eventStart" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eventEnd">Date de fin</label>
+                                    <input type="datetime-local" id="eventEnd" name="eventEnd">
+                                </div>
+                                <div class="form-group">
+                                    <label for="eventDescription">Description</label>
+                                    <textarea id="eventDescription" name="eventDescription" rows="4"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eventColor">Couleur</label>
+                                    <input type="color" id="eventColor" name="eventColor" value="#3788d8">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">Ajouter</button>
+                                    <button type="reset" class="btn-secondary">Réinitialiser</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Formulaire d'édition d'événement -->
+                        <div id="editEventForm" class="event-form-container" style="display: none;">
+                            <h3>Modifier un événement</h3>
+                            <form id="updateEventForm">
+                                <input type="hidden" id="editEventId" name="editEventId">
+                                <div class="form-group">
+                                    <label for="editEventTitle">Titre</label>
+                                    <input type="text" id="editEventTitle" name="editEventTitle" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editEventStart">Date de début</label>
+                                    <input type="datetime-local" id="editEventStart" name="editEventStart" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editEventEnd">Date de fin</label>
+                                    <input type="datetime-local" id="editEventEnd" name="editEventEnd">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editEventDescription">Description</label>
+                                    <textarea id="editEventDescription" name="editEventDescription" rows="4"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editEventColor">Couleur</label>
+                                    <input type="color" id="editEventColor" name="editEventColor" value="#3788d8">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">Mettre à jour</button>
+                                    <button type="button" id="deleteEventBtn" class="btn-danger">Supprimer</button>
+                                    <button type="button" id="cancelEditEventBtn" class="btn-secondary">Annuler</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </main>

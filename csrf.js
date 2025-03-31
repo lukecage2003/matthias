@@ -36,14 +36,19 @@ function setSecureCookie(name, value, options = {}) {
     }
     
     // Toujours activer l'option secure pour les cookies
+    // Force l'option secure même en développement local pour une sécurité maximale
     cookieString += '; secure';
     
     // Note: httpOnly ne peut pas être défini côté client, il doit être défini côté serveur
-    // L'attribut est conservé dans la configuration pour référence
+    // L'attribut est conservé dans la configuration pour référence et doit être appliqué côté serveur
+    // Pour les applications en production, configurer le serveur pour ajouter httpOnly à tous les cookies sensibles
     
-    // Définir sameSite à 'strict' par défaut pour une meilleure protection
-    const sameSiteValue = mergedOptions.sameSite || 'strict';
-    cookieString += `; samesite=${sameSiteValue}`;
+    // Définir sameSite à 'strict' pour une protection maximale contre les attaques CSRF
+    // Cette option empêche l'envoi du cookie lors de requêtes cross-site
+    cookieString += `; samesite=strict`;
+    
+    // Ajouter un chemin pour s'assurer que le cookie est disponible sur tout le site
+    cookieString += '; path=/';
     
     document.cookie = cookieString;
 }
@@ -63,6 +68,11 @@ function getCookie(name) {
 // Fonction pour générer un jeton CSRF et l'ajouter à un formulaire
 function addCSRFTokenToForm(form) {
     if (!form) return;
+    
+    // Vérifier si le formulaire a déjà été traité
+    if (form.hasAttribute('data-csrf-protected')) {
+        return form.querySelector('input[name="csrf_token"]')?.value;
+    }
     
     // Générer un nouveau jeton
     const token = generateCSRFToken();
@@ -85,6 +95,9 @@ function addCSRFTokenToForm(form) {
     
     csrfInput.value = token;
     
+    // Marquer le formulaire comme protégé
+    form.setAttribute('data-csrf-protected', 'true');
+    
     // Stocker également le jeton dans un cookie sécurisé
     setSecureCookie(`csrf_${formId}`, token);
     
@@ -97,8 +110,24 @@ function validateCSRFToken(formId, token) {
     const storedToken = csrfTokens[formId];
     const cookieToken = getCookie(`csrf_${formId}`);
     
+    // Vérifier si les jetons existent
+    if (!token || !storedToken || !cookieToken) {
+        console.error('Validation CSRF échouée: jetons manquants', {
+            hasToken: !!token,
+            hasStoredToken: !!storedToken,
+            hasCookieToken: !!cookieToken
+        });
+        return false;
+    }
+    
     // Le jeton doit correspondre à la fois au jeton stocké en mémoire et au cookie
-    const isValid = storedToken && cookieToken && token === storedToken && token === cookieToken;
+    const isValid = token === storedToken && token === cookieToken;
+    
+    // Journaliser les tentatives de validation échouées
+    if (!isValid && window.securityLogs) {
+        const clientIP = window.ipWhitelist ? window.ipWhitelist.getClientIP() : '127.0.0.1';
+        window.securityLogs.addLoginLog('système', clientIP, window.securityLogs.LOG_TYPES.SUSPICIOUS, 'Tentative de soumission avec un jeton CSRF invalide');
+    }
     
     // Supprimer le jeton après validation (usage unique)
     if (isValid) {
@@ -198,4 +227,30 @@ window.csrf = {
 document.addEventListener('DOMContentLoaded', function() {
     // Protéger tous les formulaires existants
     protectForms();
+    
+    // Observer les changements dans le DOM pour protéger les formulaires ajoutés dynamiquement
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                // Parcourir les nœuds ajoutés
+                mutation.addedNodes.forEach(function(node) {
+                    // Vérifier si le nœud est un formulaire
+                    if (node.tagName === 'FORM') {
+                        addCSRFTokenToForm(node);
+                    }
+                    // Vérifier si le nœud contient des formulaires
+                    if (node.querySelectorAll) {
+                        const forms = node.querySelectorAll('form');
+                        forms.forEach(form => addCSRFTokenToForm(form));
+                    }
+                });
+            }
+        });
+    });
+    
+    // Observer tout le document pour les changements
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 });

@@ -37,15 +37,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Vérifier quels modules sont disponibles
     const securityModulesAvailable = {
+        // Modules de base
         securityLogs: !!window.securityLogs,
         advancedSecurityLogs: !!window.advancedSecurityLogs,
         siemIntegration: !!window.siemIntegration,
         securityAlertSystem: !!window.securityAlertSystem,
-        securityMonitoring: !!window.securityMonitoring
+        securityMonitoring: !!window.securityMonitoring,
+        
+        // Nouveaux modules de sécurité
+        securePermissions: !!window.securePermissions,
+        secureEncryption: !!window.secureEncryption,
+        preparedQueries: !!window.preparedQueries,
+        attackDetection: !!window.attackDetection
     };
     
     // Afficher les modules disponibles dans la console
     console.log('Modules de sécurité disponibles:', securityModulesAvailable);
+    
+    // Initialiser les modules de sécurité avancés
+    initAdvancedSecurityModules(securityModulesAvailable);
     
     // Initialiser le système d'alerte si disponible
     if (securityModulesAvailable.securityAlertSystem) {
@@ -79,6 +89,84 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurer les gestionnaires d'événements pour les formulaires de connexion
     setupLoginFormHandlers();
 });
+
+/**
+ * Initialise les modules de sécurité avancés
+ * @param {Object} availableModules - Modules disponibles
+ */
+async function initAdvancedSecurityModules(availableModules) {
+    try {
+        // 1. Initialiser le module de permissions sécurisées basé sur le principe du moindre privilège
+        if (availableModules.securePermissions) {
+            console.log('Initialisation du module de permissions sécurisées...');
+            window.securePermissions.init({
+                strictMode: true,
+                logPermissionChecks: true
+            });
+            console.log('Module de permissions sécurisées initialisé');
+        }
+        
+        // 2. Initialiser le module de chiffrement AES-256
+        if (availableModules.secureEncryption) {
+            console.log('Initialisation du module de chiffrement AES-256...');
+            await window.secureEncryption.init({
+                keyStorage: 'secure',
+                iterations: 100000
+            });
+            console.log('Module de chiffrement AES-256 initialisé');
+        }
+        
+        // 3. Initialiser le module de requêtes préparées
+        if (availableModules.preparedQueries) {
+            console.log('Initialisation du module de requêtes préparées...');
+            window.preparedQueries.init({
+                dbType: 'mysql',
+                logQueries: true,
+                logLevel: 2
+            });
+            console.log('Module de requêtes préparées initialisé');
+        }
+        
+        // 4. Initialiser le module de détection d'attaques
+        if (availableModules.attackDetection) {
+            console.log('Initialisation du module de détection d\'attaques...');
+            window.attackDetection.init({
+                enabled: true,
+                analysisInterval: 60000, // 1 minute
+                actions: {
+                    autoBlockIPs: true,
+                    autoBlockDuration: 30,
+                    sendNotifications: true
+                }
+            });
+            console.log('Module de détection d\'attaques initialisé');
+        }
+        
+        // Journaliser l'initialisation si le module de logs est disponible
+        if (window.securityLogs) {
+            window.securityLogs.addLog({
+                status: window.securityLogs.LOG_TYPES.INFO,
+                details: 'Modules de sécurité avancés initialisés avec succès',
+                source: 'security-system-init'
+            });
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation des modules de sécurité avancés:', error);
+        
+        // Journaliser l'erreur si le module de logs est disponible
+        if (window.securityLogs) {
+            window.securityLogs.addLog({
+                status: window.securityLogs.LOG_TYPES.ERROR,
+                details: 'Erreur lors de l\'initialisation des modules de sécurité avancés: ' + error.message,
+                source: 'security-system-init'
+            });
+        }
+        
+        return false;
+    }
+}
 
 // Fonction pour initialiser l'interface utilisateur de sécurité
 function initSecurityUI(availableModules) {

@@ -220,6 +220,134 @@
 }
 
 /* FullCalendar Customization */
+.events-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.events-calendar-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.events-forms-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.event-form-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.event-form-container h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-primary {
+    background-color: #4a6cf7;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Styles pour le calendrier */
+.fc-toolbar-title {
+    font-size: 1.5em !important;
+    font-weight: 600;
+    color: #333;
+}
+
+.fc-event {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 5px;
+}
+
+.fc-day-today {
+    background-color: rgba(74, 108, 247, 0.05) !important;
+}
+
+@media (min-width: 992px) {
+    .events-container {
+        flex-direction: row;
+    }
+    
+    .events-calendar-container {
+        flex: 2;
+        margin-bottom: 0;
+        margin-right: 20px;
+    }
+    
+    .events-forms-container {
+        flex: 1;
+    }
+}
 .fc-event {
     cursor: pointer;
     border-radius: 4px;

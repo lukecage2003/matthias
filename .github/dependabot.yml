@@ -1,0 +1,43 @@
+# Configuration de GitHub Dependabot pour Tech Shield
+# Ce fichier configure les mises à jour automatiques des dépendances
+
+version: 2
+updates:
+  # Configuration pour les dépendances npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+    # Ignorer certaines mises à jour si nécessaire
+    # ignore:
+    #   - dependency-name: "example-dependency"
+    #     versions: ["4.x", "5.x"]
+    
+    # Grouper les mises à jour de dépendances mineures
+    groups:
+      minor-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    
+    # Assigner des reviewers pour les pull requests
+    assignees:
+      - "admin"
+    reviewers:
+      - "security-team"
+    
+    # Stratégie de versioning
+    versioning-strategy: auto
+    
+    # Permettre les mises à jour de versions majeures
+    allow:
+      - dependency-type: "all"

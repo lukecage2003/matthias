@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tech Shield</title>
+    <title>Tech Shield - Votre partenaire en cybersécurité</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
+    <script defer src="cookie-consent.js"></script>
 
 </head>
 <body>
@@ -24,6 +25,7 @@
                 <li><a href="#portfolio">Nos Portfolio</a></li>
                 <li><a href="#realizations">Mes Réalisations</a></li>
                 <li><a href="#about">À propos de nous</a></li>
+                <li><a href="rgpd.html">Confidentialité</a></li>
                 <li><a href="login.html">Connexion</a></li>
             </ul>
         </nav>
@@ -140,7 +142,7 @@
     <div class="modal-content">
         <a href="#!" class="close-btn">&times;</a>
         <h2>Contactez-nous</h2>
-        <form action="mailto:tyrel.matthias.amona@gmail.com" method="post" enctype="text/plain">
+        <form id="contactForm" method="post">
             <label for="name">Nom :</label>
             <input type="text" id="name" name="name" required>
 
@@ -150,6 +152,8 @@
             <label for="message">Message :</label>
             <textarea id="message" name="message" rows="4" required></textarea>
 
+            <div id="formStatus" class="form-status" style="display: none;"></div>
+            
             <button type="submit" class="send-btn">Envoyer</button>
         </form>
     </div>

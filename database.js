@@ -19,7 +19,9 @@ let encryptionKey = null;
 // Configuration de la purge automatique
 const purgeConfig = {
     maxAgeInDays: 30,           // Durée de conservation des messages en jours
-    purgeInterval: 24 * 60 * 60 * 1000  // Intervalle de purge en millisecondes (24h)
+    purgeInterval: 24 * 60 * 60 * 1000,  // Intervalle de purge en millisecondes (24h)
+    enableLogging: true,       // Activer la journalisation des purges
+    retainImportant: true      // Conserver les messages marqués comme importants
 };
 
 // Initialiser le système de base de données
@@ -198,7 +200,8 @@ async function addMessage(email, message) {
             email: encryptedEmail,
             message: sanitizeHTML(message),  // Assainir le message pour éviter les attaques XSS
             date: new Date().toISOString(),
-            read: false
+            read: false,
+            important: false  // Par défaut, les messages ne sont pas marqués comme importants
         };
         
         // Ajouter le message à la base de données
@@ -234,7 +237,7 @@ async function addMessage(email, message) {
 }
 
 // Fonction pour récupérer tous les messages
-async function getAllMessages() {
+async function getAllMessages(filters = {}) {
     try {
         // Vérifier si l'utilisateur est authentifié et a les droits d'administrateur
         if (!window.auth || !window.auth.isAuthenticated() || !window.auth.isAdmin()) {
@@ -244,10 +247,44 @@ async function getAllMessages() {
         // Charger les messages depuis le localStorage
         loadMessagesFromStorage();
         
+        // Filtrer les messages selon les critères fournis
+        let filteredMessages = [...messagesDB];
+        
+        // Filtre par date de début
+        if (filters.startDate) {
+            const startDate = new Date(filters.startDate);
+            filteredMessages = filteredMessages.filter(msg => new Date(msg.date) >= startDate);
+        }
+        
+        // Filtre par date de fin
+        if (filters.endDate) {
+            const endDate = new Date(filters.endDate);
+            filteredMessages = filteredMessages.filter(msg => new Date(msg.date) <= endDate);
+        }
+        
+        // Filtre par statut de lecture
+        if (filters.read !== undefined) {
+            filteredMessages = filteredMessages.filter(msg => msg.read === filters.read);
+        }
+        
+        // Filtre par importance
+        if (filters.important !== undefined) {
+            filteredMessages = filteredMessages.filter(msg => msg.important === filters.important);
+        }
+        
+        // Filtre par contenu du message
+        if (filters.searchText) {
+            const searchText = filters.searchText.toLowerCase();
+            filteredMessages = filteredMessages.filter(msg => {
+                // Recherche dans le contenu du message
+                return msg.message.toLowerCase().includes(searchText);
+            });
+        }
+        
         // Créer une copie des messages avec les emails déchiffrés
         const messages = [];
         
-        for (const message of messagesDB) {
+        for (const message of filteredMessages) {
             try {
                 const decryptedEmail = await decryptEmail(message.email);
                 messages.push({
@@ -263,7 +300,7 @@ async function getAllMessages() {
             }
         }
         
-        return { success: true, messages };
+        return { success: true, messages, totalCount: messages.length };
     } catch (error) {
         console.error('Erreur lors de la récupération des messages:', error);
         // Enregistrer l'erreur dans les logs de sécurité
@@ -303,6 +340,44 @@ function markMessageAsRead(messageId) {
         return { success: true };
     } catch (error) {
         console.error('Erreur lors du marquage du message comme lu:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Fonction pour marquer un message comme important (ne sera pas supprimé lors de la purge automatique)
+function markMessageAsImportant(messageId, isImportant = true) {
+    try {
+        // Vérifier si l'utilisateur est authentifié et a les droits d'administrateur
+        if (!window.auth || !window.auth.isAuthenticated() || !window.auth.isAdmin()) {
+            throw new Error('Accès non autorisé');
+        }
+        
+        // Trouver le message
+        const messageIndex = messagesDB.findIndex(msg => msg.id === messageId);
+        
+        if (messageIndex === -1) {
+            throw new Error('Message non trouvé');
+        }
+        
+        // Marquer le message comme important ou non
+        messagesDB[messageIndex].important = isImportant;
+        
+        // Sauvegarder les messages dans le localStorage
+        saveMessagesToStorage();
+        
+        // Enregistrer l'action dans les logs de sécurité
+        if (window.securityLogs) {
+            window.securityLogs.addLoginLog(
+                'système',
+                'localhost',
+                window.securityLogs.LOG_TYPES.INFO,
+                `Message ${isImportant ? 'marqué comme important' : 'non marqué comme important'}: ${messageId}`
+            );
+        }
+        
+        return { success: true };
+    } catch (error) {
+        console.error(`Erreur lors du marquage du message comme ${isImportant ? 'important' : 'non important'}:`, error);
         return { success: false, error: error.message };
     }
 }
@@ -354,10 +429,22 @@ function purgeOldMessages() {
         // Compter le nombre de messages avant la purge
         const initialCount = messagesDB.length;
         
-        // Filtrer les messages plus récents que la date limite
+        // Filtrer les messages plus récents que la date limite ou marqués comme importants
         const newMessages = messagesDB.filter(message => {
             const messageDate = new Date(message.date);
-            return messageDate >= cutoffDate;
+            
+            // Conserver les messages récents
+            if (messageDate >= cutoffDate) {
+                return true;
+            }
+            
+            // Conserver les messages importants si l'option est activée
+            if (purgeConfig.retainImportant && message.important) {
+                return true;
+            }
+            
+            // Supprimer les autres messages
+            return false;
         });
         
         // Mettre à jour la base de données
@@ -371,18 +458,29 @@ function purgeOldMessages() {
         const deletedCount = initialCount - messagesDB.length;
         
         // Enregistrer l'action dans les logs de sécurité
-        if (window.securityLogs && deletedCount > 0) {
+        if (window.securityLogs && purgeConfig.enableLogging && deletedCount > 0) {
             window.securityLogs.addLoginLog(
                 'système',
                 'localhost',
                 window.securityLogs.LOG_TYPES.INFO,
-                `Purge automatique: ${deletedCount} message(s) supprimé(s)`
+                `Purge automatique: ${deletedCount} message(s) supprimé(s), ${messagesDB.length} message(s) conservé(s)`
             );
         }
         
-        return { success: true, deletedCount };
+        return { success: true, deletedCount, remainingCount: messagesDB.length };
     } catch (error) {
         console.error('Erreur lors de la purge des anciens messages:', error);
+        
+        // Enregistrer l'erreur dans les logs de sécurité
+        if (window.securityLogs && purgeConfig.enableLogging) {
+            window.securityLogs.addLoginLog(
+                'système',
+                'localhost',
+                window.securityLogs.LOG_TYPES.ERROR,
+                `Erreur lors de la purge automatique: ${error.message}`
+            );
+        }
+        
         return { success: false, error: error.message };
     }
 }
@@ -421,6 +519,12 @@ function generateMessageId() {
 
 // Fonction pour valider un email
 function validateEmail(email) {
+    // Vérifier si l'email est null ou undefined
+    if (!email) return false;
+    
+    // Vérifier la longueur de l'email
+    if (email.length > 254) return false;
+    
     // Utiliser une expression régulière pour valider le format de l'email
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
@@ -428,20 +532,38 @@ function validateEmail(email) {
 
 // Fonction pour valider un message
 function validateMessage(message) {
+    // Vérifier si le message est null ou undefined
+    if (!message) return false;
+    
     // Vérifier que le message n'est pas vide et qu'il ne dépasse pas une certaine longueur
-    return message && message.trim().length > 0 && message.length <= 5000;
+    if (message.trim().length === 0 || message.length > 5000) return false;
+    
+    // Vérifier l'absence de caractères potentiellement dangereux pour les injections SQL
+    const sqlInjectionPattern = /('(''|[^'])*')|(\/\*[\s\S]*?\*\/)|(--)|(#)|(\/\*.*\*\/)/i;
+    if (sqlInjectionPattern.test(message)) return false;
+    
+    return true;
 }
 
 // Fonction pour assainir le HTML et prévenir les attaques XSS
 function sanitizeHTML(html) {
-    // Créer un élément div temporaire
-    const tempDiv = document.createElement('div');
+    if (!html) return '';
     
-    // Définir le contenu HTML
-    tempDiv.textContent = html;
+    // Échapper les caractères spéciaux HTML
+    const escaped = html
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/\//g, '&#x2F;');
     
-    // Récupérer le contenu assaini
-    return tempDiv.innerHTML;
+    // Supprimer les balises script et les événements JavaScript
+    const sanitized = escaped
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '');
+    
+    return sanitized;
 }
 
 // Fonction pour convertir un ArrayBuffer en Base64
@@ -464,12 +586,103 @@ function base64ToArrayBuffer(base64) {
     return bytes;
 }
 
+// Fonction pour configurer la base de données
+function configureDatabase(options = {}) {
+    // Mettre à jour la configuration de purge si des options sont fournies
+    if (options.purge) {
+        if (typeof options.purge.maxAgeInDays === 'number') {
+            purgeConfig.maxAgeInDays = options.purge.maxAgeInDays;
+        }
+        if (typeof options.purge.enableLogging === 'boolean') {
+            purgeConfig.enableLogging = options.purge.enableLogging;
+        }
+        if (typeof options.purge.retainImportant === 'boolean') {
+            purgeConfig.retainImportant = options.purge.retainImportant;
+        }
+    }
+    
+    // Mettre à jour la configuration de chiffrement si des options sont fournies
+    if (options.encryption) {
+        if (options.encryption.regenerateKey === true) {
+            // Régénérer la clé de chiffrement
+            generateEncryptionKey();
+        }
+    }
+    
+    return { success: true };
+}
+
+// Fonction pour rechercher des messages par texte
+async function searchMessages(searchText) {
+    try {
+        // Vérifier si l'utilisateur est authentifié et a les droits d'administrateur
+        if (!window.auth || !window.auth.isAuthenticated() || !window.auth.isAdmin()) {
+            throw new Error('Accès non autorisé');
+        }
+        
+        if (!searchText || typeof searchText !== 'string') {
+            throw new Error('Texte de recherche invalide');
+        }
+        
+        // Charger les messages depuis le localStorage
+        loadMessagesFromStorage();
+        
+        // Convertir le texte de recherche en minuscules pour une recherche insensible à la casse
+        const normalizedSearchText = searchText.toLowerCase();
+        
+        // Filtrer les messages qui contiennent le texte recherché
+        const matchingMessages = [];
+        
+        for (const message of messagesDB) {
+            // Vérifier si le message contient le texte recherché
+            if (message.message.toLowerCase().includes(normalizedSearchText)) {
+                try {
+                    // Déchiffrer l'email pour l'affichage
+                    const decryptedEmail = await decryptEmail(message.email);
+                    matchingMessages.push({
+                        ...message,
+                        email: decryptedEmail
+                    });
+                } catch (decryptError) {
+                    // Si le déchiffrement échoue, utiliser une valeur par défaut
+                    matchingMessages.push({
+                        ...message,
+                        email: '[Email chiffré]'
+                    });
+                }
+            }
+        }
+        
+        return { 
+            success: true, 
+            messages: matchingMessages, 
+            count: matchingMessages.length,
+            searchText: searchText
+        };
+    } catch (error) {
+        console.error('Erreur lors de la recherche de messages:', error);
+        // Enregistrer l'erreur dans les logs de sécurité
+        if (window.securityLogs) {
+            window.securityLogs.addLoginLog(
+                'système',
+                'localhost',
+                window.securityLogs.LOG_TYPES.ERROR,
+                'Erreur de recherche de messages: ' + error.message
+            );
+        }
+        return { success: false, error: error.message };
+    }
+}
+
 // Exporter les fonctions pour les utiliser dans d'autres fichiers
 window.database = {
     initDatabase,
+    configureDatabase,
     addMessage,
     getAllMessages,
+    searchMessages,
     markMessageAsRead,
+    markMessageAsImportant,
     deleteMessage,
     purgeOldMessages,
     validateEmail,
