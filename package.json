@@ -8,7 +8,7 @@
     "audit": "npm audit"
   },
   "dependencies": {
-    "fullcalendar": "^6.1.10"
+    "fullcalendar": "^7.0.2"
   },
   "devDependencies": {},
   "repository": {
